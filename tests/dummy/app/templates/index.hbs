@@ -1,0 +1,82 @@
+{{!-- template-lint-disable no-bare-strings  --}}
+
+{{docs-hero
+  prefix="ember-sequential-render"
+  heading=""
+  byline="An elegant way to optimize your render performance"
+}}
+{{#docs-demo class="demo-wrapper" as |demo|}}
+  <h2 class="title">Example 1</h2>
+  {{#demo.example name="demolinks"}}
+    {{#link-to "docs.unoptimized"
+      class="demo-link"
+    }}
+      Without Sequential Render
+    {{/link-to}}
+    {{#link-to "docs.optimized"
+      class="demo-link"
+    }}
+      With Sequential Render
+    {{/link-to}}
+  {{/demo.example}}
+{{/docs-demo}}
+{{#docs-demo class="demo-wrapper" as |demo|}}
+
+  <h2 class="title">Example 2</h2>
+  {{#demo.example name="priorityZero1.hbs"}}
+    {{#sequential-render
+      renderPriority=0
+      taskName="priorityZero1"
+      fetchDataTask=testTaskDelay as |renderHash|
+    }}
+      {{#renderHash.render-content}}
+        PO ELEMENT
+      {{/renderHash.render-content}}
+      {{#renderHash.loader-state}}
+        <div class="loader"></div>
+      {{/renderHash.loader-state}}
+    {{/sequential-render}}
+  {{/demo.example}}
+  {{#demo.example name="priorityOne1.hbs"}}
+    {{#sequential-render
+      renderPriority=1
+      taskName="priorityOne1"
+      fetchDataTask=testTaskDelay as |renderHash|
+    }}
+      {{#renderHash.render-content}}
+        P1 ELEMENT
+      {{/renderHash.render-content}}
+      {{#renderHash.loader-state}}
+        <div class="loader"></div>
+      {{/renderHash.loader-state}}
+    {{/sequential-render}}
+  {{/demo.example}}
+  {{#demo.example name="priorityOne2.hbs"}}
+    {{#sequential-render
+      renderPriority=1
+      taskName="priorityOne2"
+      asyncRender=false as |renderHash|
+    }}
+      {{#renderHash.render-content}}
+        P1 ELEMENT [No data fetch]
+      {{/renderHash.render-content}}
+      {{#renderHash.loader-state}}
+        <div class="loader"></div>
+      {{/renderHash.loader-state}}
+    {{/sequential-render}}
+  {{/demo.example}}
+  {{#demo.example name="priorityTwo1.hbs"}}
+    {{#sequential-render
+      renderPriority=4
+      taskName="priorityTwo1"
+      asyncRender=false as |renderHash|
+    }}
+      {{#renderHash.render-content}}
+        P4 ELEMENT [No data fetch]
+      {{/renderHash.render-content}}
+      {{#renderHash.loader-state}}
+        <div class="loader"></div>
+      {{/renderHash.loader-state}}
+    {{/sequential-render}}
+  {{/demo.example}}
+{{/docs-demo}}

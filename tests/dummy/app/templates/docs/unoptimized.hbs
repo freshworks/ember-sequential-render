@@ -1,0 +1,39 @@
+{{!-- template-lint-disable no-bare-strings  --}}
+
+<div class="element-flex schoolroom">
+  <div class="flex1 schoolroom__mainpanel">
+    <h2 class="maintitle">Dumbledore's Army</h2>
+    {{#each spellWork as |spell|}}
+      <div class="card">
+        <div class="title">
+          {{spell.name}}
+        </div>
+        <div class="subtext">
+          {{spell.description}}
+        </div>
+      </div>
+    {{/each}}
+  </div>
+  <div class="schoolroom__sidepane">
+    <div class="section">
+      <h4 class="title">
+        Participants
+      </h4>
+      <div class="element-flex avatarpane">
+        {{#each participantsList as |person|}}
+          <div class="avatar-item" aria-label={{person.name}}>
+            <img class="element-flex avatar-image-wrapper" src={{person.avatar}} alt={{person.name}}>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+    <div class="section">
+      <h4 class="title">
+        Quick Notes
+      </h4>
+      <div class="editor" contenteditable="true">
+        {{notes}}
+      </div>
+    </div>
+  </div>
+</div>
