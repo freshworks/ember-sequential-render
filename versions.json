@@ -1,14 +1,14 @@
 {
-  "V1.0.0": {
-    "path": "versions/V1.0.0",
-    "name": "V1.0.0",
+  "v1.0.0": {
+    "path": "versions/v1.0.0",
+    "name": "v1.0.0",
     "sha": "f6228cf94694210adebb01b1e417af595212e48b",
-    "tag": "V1.0.0"
+    "tag": "v1.0.0"
   },
   "-latest": {
     "path": "",
     "name": "Latest",
     "sha": "f6228cf94694210adebb01b1e417af595212e48b",
-    "tag": "V1.0.0"
+    "tag": "v1.0.0"
   }
 }
