@@ -1,0 +1,9 @@
+{{#if isFullFilled}}
+  {{#if loaderClass}}
+    <div class={{if showFadedState loaderClass}}>
+      {{yield}}
+    </div>
+  {{else}}
+    {{yield}}
+  {{/if}}
+{{/if}}

@@ -1,0 +1,137 @@
+:root {
+  --brand-primary: #2c5cc5;
+
+  /* eslint-disable-next-line */
+  font-size: 14px;
+}
+
+/* Safari */
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid gray;
+  width: 30px;
+  height: 30px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+}
+
+.demo-wrapper {
+  min-width: 420px;
+  padding: 8px;
+  margin: 32px auto 0;
+}
+
+.demo-link {
+  border: 2px solid #2c5cc5;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 4px;
+}
+
+.demo-link:hover {
+  background-color: #e5f2fd;
+}
+
+.schoolroom {
+  height: 50vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.schoolroom__sidepane {
+  width: 240px;
+  background-color: #f5f7f9;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.schoolroom__mainpanel {
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #ebeff3;
+}
+
+.avatarpane {
+  flex-wrap: wrap;
+}
+
+.avatar-item {
+  margin-left: -2px;
+}
+
+.avatar-image-wrapper {
+  box-shadow: 0 0 0 4px #fff;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  height: 30px;
+}
+
+/* Utilities */
+
+.element-flex {
+  display: flex;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.maintitle {
+  color: #183247;
+  font-weight: 500;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.title {
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #183247;
+  font-size: 12px;
+  letter-spacing: .2px;
+}
+
+.subtext {
+  color: #6f7c87;
+  font-size: 12px;
+}
+
+.section {
+  margin-bottom: 24px;
+  min-height: 120px;
+}
+
+.card {
+  padding: 8px;
+  background-color: #fff;
+  border-radius: 4px;
+  border: 1px solid #cfd7df;
+  margin: 8px 0;
+}
+
+.editor {
+  height: 120px;
+  background-color: #fff;
+  border: 1px solid #cfd7df;
+  font-size: 12px;
+  border-radius: 4px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.editor:focus {
+  outline: 0;
+  border: 1px solid transparent;
+  box-shadow: 0 0 0 2px #2c5cc5;
+}

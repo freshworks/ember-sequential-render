@@ -1,0 +1,1 @@
+export { default } from 'ember-sequential-render/components/sequential-render/content';
