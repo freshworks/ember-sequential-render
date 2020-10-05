@@ -1,1 +1,1 @@
-export { default } from 'ember-sequential-render/services/render-states';
+export { default } from '@freshworks/ember-sequential-render/services/render-states';

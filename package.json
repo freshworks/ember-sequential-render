@@ -1,5 +1,5 @@
 {
-  "name": "ember-sequential-render",
+  "name": "@freshworks/ember-sequential-render",
   "version": "1.0.0",
   "description": "An elegant solution to optimize your application's render performance.",
   "keywords": [
@@ -13,7 +13,7 @@
     "url": "https://github.com/freshworks/ember-sequential-render.git"
   },
   "license": "MIT",
-  "author": "",
+  "author": "Kanalveli Ramachandran <kanalveli.ramachandran@freshworks.com",
   "directories": {
     "doc": "doc",
     "test": "tests"
