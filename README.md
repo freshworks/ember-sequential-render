@@ -30,7 +30,7 @@ Installation
 ------------------------------------------------------------------------------
 
 ```
-ember install ember-sequential-render
+ember install @freshworks/ember-sequential-render
 ```
 
 
