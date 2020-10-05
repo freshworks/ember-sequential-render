@@ -10,5 +10,11 @@
     "name": "Latest",
     "sha": "f6228cf94694210adebb01b1e417af595212e48b",
     "tag": "v1.0.0"
+  },
+  "scope-repo": {
+    "path": "versions/scope-repo",
+    "name": "scope-repo",
+    "sha": "f6bede8395173b5b2e9c36bad163f562da3ba53f",
+    "tag": null
   }
 }
