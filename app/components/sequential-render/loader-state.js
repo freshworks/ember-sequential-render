@@ -1,1 +1,1 @@
-export { default } from 'ember-sequential-render/components/sequential-render/loader-state';
+export { default } from '@freshworks/ember-sequential-render/components/sequential-render/loader-state';
