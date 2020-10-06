@@ -11,12 +11,6 @@
     "sha": "4a10ecea5d9b0b49440540f9ad04069b4ba4f6be",
     "tag": "v1.1.0"
   },
-  "scope-repo": {
-    "path": "versions/scope-repo",
-    "name": "scope-repo",
-    "sha": "f6bede8395173b5b2e9c36bad163f562da3ba53f",
-    "tag": null
-  },
   "v1.1.0": {
     "path": "versions/v1.1.0",
     "name": "v1.1.0",
