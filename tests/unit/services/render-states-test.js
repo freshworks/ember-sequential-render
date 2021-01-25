@@ -37,7 +37,7 @@ module('Unit | Service | render-states', function(hooks) {
       renderState: 2,
       availablePriorities: [0, 2, 5],
       renderQueue: { 0: [], 2: ['uniqueP2Task1'], 5: ['uniqueP5Task1'] },
-      scheduledCalls: [function testFn1(){}, function testFn2(){}]
+      scheduledCalls: {'task1': function testFn1(){}, 'task2': function testFn2(){}}
     });
 
     service.resetRenderState();

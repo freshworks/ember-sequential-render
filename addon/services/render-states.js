@@ -46,10 +46,14 @@ export default Service.extend(Evented, {
 
   init() {
     this._super(...arguments);
+    this._resetProperties();
+  },
+
+  _resetProperties() {
     setProperties(this, {
       renderQueue: {},
       availablePriorities: A(),
-      scheduledCalls: A()
+      scheduledCalls: {}
     })
   },
 
@@ -76,16 +80,14 @@ export default Service.extend(Evented, {
     @public
   */
   resetRenderState() {
+    let scheduledCalls = get(this, 'scheduledCalls');
+    Object.values(scheduledCalls).forEach(call => cancel(call));
+    this._resetProperties();
     setProperties(this, {
-      renderQueue: {},
       maxRenderPriority: MAX_RENDER_PRIORITY,
-      availablePriorities: A(),
       // We need't trigger state change for reset. It should be handled through the context change.
       renderState: CRITICAL_RENDER_STATE 
     });
-    let scheduledCalls = get(this, 'scheduledCalls');
-    scheduledCalls.forEach(call => cancel(call));
-    set(this, 'scheduledCalls', A());
   },
   modifyRenderState(state) {
     let {

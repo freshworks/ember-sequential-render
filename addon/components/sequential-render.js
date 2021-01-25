@@ -258,6 +258,8 @@ export default Component.extend({
         quickRender
       } = getProperties(this, 'renderPriority', 'taskName', 'quickRender');
 
+      delete get(this, 'renderStates').scheduledCalls[taskName];
+
       if (get(this, 'renderCallback')) {
         get(this, 'renderCallback')(get(this, 'content'));
       }
@@ -279,7 +281,7 @@ export default Component.extend({
     let runNext = run.next(() => {
       this.reportRenderState();
     });
-    get(this, 'renderStates').scheduledCalls.pushObject(runNext);
+    get(this, 'renderStates').scheduledCalls[get(this, 'taskName')] = runNext;
   }
 });
 
