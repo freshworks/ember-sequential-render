@@ -29,6 +29,19 @@ module('Unit | Service | render-states', function(hooks) {
     assert.equal(service.maxRenderPriority, 3, 'Test that the new max priority is updated');
   });
 
+  test('resetRenderState: Test that resetRenderState calls _resetProperties', function(assert) {
+    let service = this.owner.lookup('service:render-states');
+    const resetPropertiesSpy = sinon.spy(service, '_resetProperties');
+    setProperties(service, {
+      maxRenderPriority: 5,
+      scheduledCalls: {'task1': function testFn1(){}, 'task2': function testFn2(){}}
+    });
+    service.resetRenderState();
+    sinon.assert.callCount(resetPropertiesSpy, 1);
+    resetPropertiesSpy.restore();
+    assert.ok(true);
+  });
+
   test('resetRenderState: Test that all the states / queues are reset', function(assert) {
     let service = this.owner.lookup('service:render-states');
 
@@ -86,6 +99,25 @@ module('Unit | Service | render-states', function(hooks) {
     assert.notIncludes(service.renderQueue[0], 'uniqueP0Task2', 'Test P0 task removal');
     assert.ok(service.removeFromQueue(0, 'uniqueP0Task1'), 'Test returns true when queue is empty');
     assert.empty(service.renderQueue[0], 'Test all tasks are removed');
+  });
+
+  test('addScheduledCall: Test adding function calls to scheduleCalls', function(assert) {
+    let service = this.owner.lookup('service:render-states');
+    service.addScheduledCall('task1', function testFn1(){});
+    assert.includes(Object.keys(service.scheduledCalls)[0], 'task1', 'Test task1 added to scheduledCall');
+    service.addScheduledCall('task2', function testFn2(){});
+    assert.includes(Object.keys(service.scheduledCalls)[1], 'task2', 'Test task2 added to scheduledCall');
+    service.addScheduledCall('task3', function testFn3(){});
+    assert.includes(Object.keys(service.scheduledCalls)[2], 'task3', 'Test task3 added to scheduledCall');
+  });
+
+  test('removeScheduledCall: Test removing function calls to scheduleCalls', function(assert) {
+    let service = this.owner.lookup('service:render-states');
+    service.resetRenderState();
+    service.addScheduledCall('task1', function testFn1(){});
+    service.addScheduledCall('task2', function testFn2(){});
+    service.removeScheduledCall('task1');
+    assert.notOk((Object.keys(service.scheduledCalls)[0]).includes('task1'));
   });
 
   module('Test render state changes when items are removed from the queue', function() {

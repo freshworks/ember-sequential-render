@@ -255,17 +255,19 @@ export default Component.extend({
       let {
         renderPriority,
         taskName,
-        quickRender
-      } = getProperties(this, 'renderPriority', 'taskName', 'quickRender');
+        quickRender,
+        renderStates
+      } = getProperties(this, 'renderPriority', 'taskName', 'quickRender', 'renderStates');
 
-      delete get(this, 'renderStates').scheduledCalls[taskName];
+      
+      renderStates.removeScheduledCall(taskName);
 
       if (get(this, 'renderCallback')) {
         get(this, 'renderCallback')(get(this, 'content'));
       }
 
       if (!quickRender) {
-        get(this, 'renderStates').removeFromQueueAndModifyRender(renderPriority, taskName);
+        renderStates.removeFromQueueAndModifyRender(renderPriority, taskName);
       }
 
       setProperties(this, {
@@ -281,7 +283,7 @@ export default Component.extend({
     let runNext = run.next(() => {
       this.reportRenderState();
     });
-    get(this, 'renderStates').scheduledCalls[get(this, 'taskName')] = runNext;
+    get(this, 'renderStates').addScheduledCall(get(this, 'taskName'), runNext);
   }
 });
 
