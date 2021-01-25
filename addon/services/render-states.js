@@ -25,7 +25,7 @@ import {
   RENDER_STATE_CHANGE_EVENT
 } from '../constants/render-states';
 import Evented from '@ember/object/evented';
-import { later } from '@ember/runloop';
+import { later, cancel } from '@ember/runloop';
 
 const { critical: CRITICAL_RENDER_STATE, secondary: MAX_RENDER_PRIORITY } = RENDER_PRIORITY;
 
@@ -48,7 +48,8 @@ export default Service.extend(Evented, {
     this._super(...arguments);
     setProperties(this, {
       renderQueue: {},
-      availablePriorities: A()
+      availablePriorities: A(),
+      scheduledCalls: A()
     })
   },
 
@@ -82,6 +83,9 @@ export default Service.extend(Evented, {
       // We need't trigger state change for reset. It should be handled through the context change.
       renderState: CRITICAL_RENDER_STATE 
     });
+    let scheduledCalls = get(this, 'scheduledCalls');
+    scheduledCalls.forEach(call => cancel(call));
+    set(this, 'scheduledCalls', A());
   },
   modifyRenderState(state) {
     let {

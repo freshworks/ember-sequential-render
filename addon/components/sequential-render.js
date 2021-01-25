@@ -276,9 +276,10 @@ export default Component.extend({
   updateRenderStates() {
     set(this, 'isFullFilled', true);
 
-    run.next(() => {
+    let runNext = run.next(() => {
       this.reportRenderState();
     });
+    get(this, 'renderStates').scheduledCalls.pushObject(runNext);
   }
 });
 

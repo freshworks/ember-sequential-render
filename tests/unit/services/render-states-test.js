@@ -36,7 +36,8 @@ module('Unit | Service | render-states', function(hooks) {
       maxRenderPriority: 5,
       renderState: 2,
       availablePriorities: [0, 2, 5],
-      renderQueue: { 0: [], 2: ['uniqueP2Task1'], 5: ['uniqueP5Task1'] }
+      renderQueue: { 0: [], 2: ['uniqueP2Task1'], 5: ['uniqueP5Task1'] },
+      scheduledCalls: [function testFn1(){}, function testFn2(){}]
     });
 
     service.resetRenderState();
@@ -44,6 +45,7 @@ module('Unit | Service | render-states', function(hooks) {
     assert.equal(service.maxRenderPriority, 1, 'Test that maxRenderPriority is reset');
     assert.empty(service.availablePriorities, 'Test that availablePriorities is empty');
     assert.equal(service.renderState, 0, 'Test that renderState is reset');
+    assert.empty(service.scheduledCalls, 'Test that scheduledCalls array is reset');
   });
 
   test('triggerRenderStateChange: Test that the event is fired on calling the function', function(assert) {
