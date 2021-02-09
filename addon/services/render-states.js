@@ -25,7 +25,7 @@ import {
   RENDER_STATE_CHANGE_EVENT
 } from '../constants/render-states';
 import Evented from '@ember/object/evented';
-import { later } from '@ember/runloop';
+import { later, cancel } from '@ember/runloop';
 
 const { critical: CRITICAL_RENDER_STATE, secondary: MAX_RENDER_PRIORITY } = RENDER_PRIORITY;
 
@@ -46,9 +46,22 @@ export default Service.extend(Evented, {
 
   init() {
     this._super(...arguments);
+    this._resetProperties();
+  },
+
+  /**
+   * @private
+   * @function _resetProperties
+   * @description Resets all queues and states
+   */
+  _resetProperties() {
     setProperties(this, {
       renderQueue: {},
-      availablePriorities: A()
+      availablePriorities: A(),
+      scheduledCalls: {},
+      maxRenderPriority: MAX_RENDER_PRIORITY,
+      // We need't trigger state change for reset. It should be handled through the context change.
+      renderState: CRITICAL_RENDER_STATE
     })
   },
 
@@ -75,13 +88,9 @@ export default Service.extend(Evented, {
     @public
   */
   resetRenderState() {
-    setProperties(this, {
-      renderQueue: {},
-      maxRenderPriority: MAX_RENDER_PRIORITY,
-      availablePriorities: A(),
-      // We need't trigger state change for reset. It should be handled through the context change.
-      renderState: CRITICAL_RENDER_STATE 
-    });
+    let scheduledCalls = get(this, 'scheduledCalls');
+    Object.values(scheduledCalls).forEach(call => cancel(call));
+    this._resetProperties();
   },
   modifyRenderState(state) {
     let {
@@ -101,6 +110,27 @@ export default Service.extend(Evented, {
     } else {
       this.modifyRenderState(state + 1);
     }
+  },
+
+  /**
+   * @function addScheduledCall
+   * @description Adds new entry to scheduledCalls property in {taskName: function(){}} format.
+   * @param {String} taskName - The name of the task to be added.
+   * @param {function} funtionReference - The scheduled function reference for the taskName.
+   */
+  addScheduledCall(taskName, funtionReference) {
+    let scheduledCalls = get(this, 'scheduledCalls');
+    scheduledCalls[taskName] = funtionReference;
+  },
+
+  /**
+   * @function removeScheduledCall
+   * @description Removes the entry from scheduledCalls property.
+   * @param {String} taskName - The name of the task to be removed
+   */
+  removeScheduledCall(taskName) {
+    let scheduledCalls = get(this, 'scheduledCalls');
+    delete scheduledCalls[taskName];
   },
 
   addToQueue(priority, taskName) {
