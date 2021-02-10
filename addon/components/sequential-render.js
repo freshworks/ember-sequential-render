@@ -242,11 +242,22 @@ export default Component.extend({
 
   fetchData: task(function* () {
     let { queryParams, taskOptions } = getProperties(this, 'queryParams', 'taskOptions');
-    let content = yield get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+    let content;
+    if (get(this, 'getData')) {
+      content = yield get(this, 'getData')();
+    } else {
+      content = yield get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+    }
 
     set(this, 'content', content);
-    if (!(isNone(content) && get(this, 'renderPriority') === criticalRender)) {
-      this.updateRenderStates();
+    if (get(this, 'renderCallback')) {
+      if (!(isNone(content) && get(this, 'renderPriority') === criticalRender)) {
+        this.updateRenderStates();
+      }
+    } else {
+      if (get(this, 'renderPriority') === criticalRender) {
+        this.updateRenderStates();
+      }
     }
   }).restartable(),
 
