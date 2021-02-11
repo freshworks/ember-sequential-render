@@ -14,6 +14,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       'afterTask1': () => assert.step('first'),
       'afterTask2': () => assert.step('second'),
       'afterTask3': () => assert.step('third'),
+       getData: () => new Promise(resolve =>  {
+        setTimeout(resolve(), 2000)
+      }),
       fetchDataTask: {
         perform() {
           return function*() {
@@ -93,6 +96,45 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderPriority={{1}}
         @taskName="task2"
         @fetchDataTask={{this.fetchDataTask}}
+        @renderCallback={{this.afterTask2}}
+        as |seq1|
+      >
+      <seq1.RenderContent>
+        <h1>Render Second</h1>
+      </seq1.RenderContent>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{1}}
+        @taskName="task3"
+        @asyncRender={{false}}
+        @renderCallback={{this.afterTask3}}
+        as |seq1|
+      >
+      <seq1.RenderContent>
+        <h1>Render Second</h1>
+      </seq1.RenderContent>
+      </SequentialRender>
+      `)
+      assert.verifySteps(['first', 'third', 'second']);
+  });
+
+  test('Check order of execution when an getData parameter which is a promise is present', async function(assert) {
+    await render(hbs `
+      <SequentialRender
+        @renderPriority={{0}}
+        @taskName="Task1"
+        @asyncRender={{false}}
+        @renderCallback={{this.afterTask1}}
+        as |seq|
+      >
+        <seq.RenderContent>
+          <h1>Render Second</h1>
+        </seq.RenderContent>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{1}}
+        @taskName="task2"
+        @getData={{this.getData}}
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >

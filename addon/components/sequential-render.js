@@ -20,6 +20,7 @@
       context=pageContext
       taskName='fetchPrimaryContent'
       fetchDataTask=fetchPrimaryContent
+      getData=executePromise
       queryParams=queryParams
       renderCallback=(action 'contentRenderCallback') as |renderHash|
     }}
@@ -109,9 +110,19 @@ export default Component.extend({
   asyncRender: true,
 
   /**
+    Promise that can be executed to perform the required actions.
+
+    @argument getData
+    @type Promise
+    @public
+  */
+  getData: null,
+
+  /**
     ember-concurrency task that can be performed to fetch the required content.
 
     @argument fetchDataTask
+    @deprecated use getData instead
     @type task
     @public
   */
@@ -121,6 +132,7 @@ export default Component.extend({
     Queryparams required for fetching data. This is used as the first argument for fetchDataTask. 
 
     @argument queryParams
+    @deprecated use getData instead
     @type object
     @public
   */
@@ -130,6 +142,7 @@ export default Component.extend({
     Additional options required for fetchDataTask. This is the second argument while performing it.
 
     @argument taskOptions
+    @deprecated use getData instead
     @public
   */
   taskOptions: undefined,
@@ -243,10 +256,12 @@ export default Component.extend({
   fetchData: task(function* () {
     let { queryParams, taskOptions } = getProperties(this, 'queryParams', 'taskOptions');
     let content;
-    if (get(this, 'getData')) {
-      content = yield get(this, 'getData')();
-    } else {
-      content = yield get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+    try {
+      content = get(this, 'getData')
+      ? yield get(this, 'getData')()
+      : yield get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+    } catch (error) {
+      throw new Error(`Error occured when executing fetchData: ${error}`);
     }
 
     set(this, 'content', content);
