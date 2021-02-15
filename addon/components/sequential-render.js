@@ -19,9 +19,7 @@
       renderPriority=1
       context=pageContext
       taskName='fetchPrimaryContent'
-      fetchDataTask=fetchPrimaryContent
       getData=executePromise
-      queryParams=queryParams
       renderCallback=(action 'contentRenderCallback') as |renderHash|
     }}
       {{#renderHash.loader-state}}
@@ -36,7 +34,6 @@
   @class sequential-render
   @public
   @yield {Hash} hash
-  @yield {Any} hash.content The response from performing fetchDataTask.
   @yield {boolean} hash.isContentLoading Flag to check the loading state of the data fetch.
   @yield {component} hash.render-content Block component used to render the content of the item.
         Accepts loaderClass as an argument. This class can be used to style the subsequent loading states for the item.  
@@ -103,6 +100,7 @@ export default Component.extend({
     Set this to false if you only need the component to render the content.
 
     @argument asyncRender
+    @deprecated presence of getData attribute implies async operation
     @type boolean
     @public
     @default true
@@ -245,7 +243,7 @@ export default Component.extend({
         get(this, 'renderStates').addToQueue(renderPriority, taskName);
       }
 
-      if (asyncRender && !renderImmediately) {
+      if ((asyncRender || get(this, 'getData') || get(this, 'fetchDataTask')) && !renderImmediately) {
         get(this, 'fetchData').perform();
       } else {
         this.updateRenderStates();
@@ -257,22 +255,16 @@ export default Component.extend({
     let { queryParams, taskOptions } = getProperties(this, 'queryParams', 'taskOptions');
     let content;
     try {
-      content = get(this, 'getData')
-      ? yield get(this, 'getData')()
-      : yield get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+      let promise = get(this, 'getData') ? get(this, 'getData')()
+        :  get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+      content = yield promise;
     } catch (error) {
       throw new Error(`Error occured when executing fetchData: ${error}`);
     }
 
     set(this, 'content', content);
-    if (get(this, 'renderCallback')) {
-      if (!(isNone(content) && get(this, 'renderPriority') === criticalRender)) {
-        this.updateRenderStates();
-      }
-    } else {
-      if (get(this, 'renderPriority') === criticalRender) {
-        this.updateRenderStates();
-      }
+    if (!(isNone(content) && get(this, 'renderPriority') === criticalRender)) {
+      this.updateRenderStates();
     }
   }).restartable(),
 

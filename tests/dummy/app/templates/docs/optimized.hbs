@@ -5,8 +5,8 @@
     <h2 class="maintitle">Dumbledore's Army</h2>
     {{#sequential-render
       renderPriority=0
-      taskName="fetchSpellWork"
-      fetchDataTask=fetchSpellWork as |spellHash|
+      taskName="getSpellWork"
+      getData=getSpellWork as |spellHash|
     }}
       {{#spellHash.render-content}}
         {{#each spellWork as |spell|}}
@@ -32,8 +32,8 @@
       </h4>
       {{#sequential-render
         renderPriority=1
-        taskName="fetchParticipants"
-        fetchDataTask=fetchParticipants as |participantsHash|
+        taskName="getParticipants"
+        getData=getParticipants as |participantsHash|
       }}
         {{#participantsHash.render-content}}
           <div class="element-flex avatarpane">
@@ -56,8 +56,8 @@
       </h4>
       {{#sequential-render
         renderPriority=1
-        taskName="fetchNotes"
-        fetchDataTask=fetchNotes as |notesHash|
+        taskName="getNotes"
+        getData=getNotes as |notesHash|
       }}
         {{#notesHash.render-content}}
           <div class="editor" contenteditable="true">
