@@ -19,42 +19,30 @@ export default Controller.extend({
     this.set('getParticipants', get(this, 'fetchParticipants').bind(this));
   },
   fetchParticipants: async function () {
-    let participants;
-    try {
-      let data = await fetch(StaticUrl.mockURL500);
-      participants = JSON.parse(data).notes;
-    } catch (error) {
-      participants = Participants;
-    } finally {
-      set(this, 'participantsList', participants);
-      // eslint-disable-next-line no-unsafe-finally
-      return participants;
-    }
+    let participants = await fetch(StaticUrl.mockURL500)
+      .then(response => {
+        return JSON.parse(response).participants
+      })
+      .catch( () =>  Participants);
+    set(this, 'participantsList', participants);
+    return participants;
   },
   fetchNotes: async function() {
-    let notes;
-    try {
-      let data = await fetch(StaticUrl.mockURL200);
-      notes = JSON.parse(data).notes;
-    } catch (error) {
-      notes = Notes;
-    } finally {
-      set(this, 'notes', notes);
-      // eslint-disable-next-line no-unsafe-finally
-      return notes;
-    }
+    let notes = await fetch(StaticUrl.mockURL200)
+      .then(response => {
+        return JSON.parse(response).notes
+      })
+      .catch( () =>  Notes);
+    set(this, 'notes', notes);
+    return notes;
   },
   fetchSpellWork: async function () {
-    let spellWork;
-    try {
-      let data = await fetch(StaticUrl.mockURL500);
-      spellWork = JSON.parse(data).spellWork;
-    } catch (error) {
-      spellWork = SpellWork;
-    } finally {
-      set(this, 'spellWork', spellWork);
-      // eslint-disable-next-line no-unsafe-finally
-      return spellWork;
-    }
+    let spellWork = await fetch(StaticUrl.mockURL500)
+      .then(response => {
+        return JSON.parse(response).spellWork
+      })
+      .catch( () =>  SpellWork);
+    set(this, 'spellWork', spellWork);
+    return spellWork;
   }
 });

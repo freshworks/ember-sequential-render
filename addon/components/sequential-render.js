@@ -34,6 +34,7 @@
   @class sequential-render
   @public
   @yield {Hash} hash
+  @yield {Any} hash.content The response from performing getData.
   @yield {boolean} hash.isContentLoading Flag to check the loading state of the data fetch.
   @yield {component} hash.render-content Block component used to render the content of the item.
         Accepts loaderClass as an argument. This class can be used to style the subsequent loading states for the item.  
@@ -243,7 +244,7 @@ export default Component.extend({
         get(this, 'renderStates').addToQueue(renderPriority, taskName);
       }
 
-      if ((asyncRender || get(this, 'getData') || get(this, 'fetchDataTask')) && !renderImmediately) {
+      if ((asyncRender || get(this, 'getData')) && !renderImmediately) {
         get(this, 'fetchData').perform();
       } else {
         this.updateRenderStates();
