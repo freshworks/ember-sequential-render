@@ -109,10 +109,10 @@ export default Component.extend({
   asyncRender: true,
 
   /**
-    Promise that can be executed to perform the required actions.
+    The function that performs all the required asynchronous actions and returns a promise.
 
     @argument getData
-    @type Promise
+    @type function
     @public
   */
   getData: null,

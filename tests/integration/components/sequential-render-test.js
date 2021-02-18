@@ -14,6 +14,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       'afterTask1': () => assert.step('first'),
       'afterTask2': () => assert.step('second'),
       'afterTask3': () => assert.step('third'),
+       getDataNoPromise: () => 'test',
        getData: () => new Promise(resolve =>  {
         setTimeout(resolve(), 2000)
       }),
@@ -157,6 +158,45 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       assert.verifySteps(['first', 'third', 'second']);
   });
 
+  test('Check order of execution when an getData returns non-promise', async function(assert) {
+    await render(hbs `
+      <SequentialRender
+        @renderPriority={{0}}
+        @taskName="Task1"
+        @asyncRender={{false}}
+        @renderCallback={{this.afterTask1}}
+        as |seq|
+      >
+        <seq.RenderContent>
+          <h1>Render Second</h1>
+        </seq.RenderContent>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{1}}
+        @taskName="task2"
+        @getData={{this.getDataNoPromise}}
+        @renderCallback={{this.afterTask2}}
+        as |seq1|
+      >
+      <seq1.RenderContent>
+        <h1>Render Second</h1>
+      </seq1.RenderContent>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{1}}
+        @taskName="task3"
+        @asyncRender={{false}}
+        @renderCallback={{this.afterTask3}}
+        as |seq1|
+      >
+      <seq1.RenderContent>
+        <h1>Render Second</h1>
+      </seq1.RenderContent>
+      </SequentialRender>
+      `)
+      assert.verifySteps(['first', 'third', 'second']);
+  });
+
   test('Check order of renders when renderImmediately is used', async function(assert) {
     await render(hbs `
       <SequentialRender
@@ -251,5 +291,5 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       this.set('triggerOutOfOrder', true);
       await settled();
       assert.verifySteps(['first', 'third', 'second', 'third']);
-  })
+  });
 });
