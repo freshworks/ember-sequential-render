@@ -15,12 +15,12 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       'afterTask1': () => assert.step('first'),
       'afterTask2': () => assert.step('second'),
       'afterTask3': () => assert.step('third'),
-       getData: () => new Promise(resolve =>  {
+      getData: () => new Promise(resolve =>  {
          setTimeout(resolve(), 2000)
         }),
-       getDataNoPromise: () => 'test',
-       getDataNotFunction: 'test',
-       getDataThrowsError: () => { throw new Error ('myError')},
+      getDataNoPromise: () => 'test',
+      getDataNotFunction: 'test',
+      getDataThrowsError: () => { throw new Error ('myError')},
       fetchDataTask: {
         perform() {
           return function*() {
