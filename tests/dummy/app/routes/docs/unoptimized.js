@@ -6,9 +6,9 @@ export default Route.extend({
   model() {
     let controller = this.controllerFor('docs.unoptimized');
     return RSVP.hash({
-      spellWork: controller.fetchSpellWork.perform(),
-      participants: controller.fetchParticipants.perform(),
-      notes: controller.fetchNotes.perform()
+      spellWork: controller.fetchSpellWork(),
+      participants: controller.fetchParticipants(),
+      notes: controller.fetchNotes()
     });
   },
   resetController(controller, isExiting) {

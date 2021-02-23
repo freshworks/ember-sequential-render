@@ -19,8 +19,7 @@
       renderPriority=1
       context=pageContext
       taskName='fetchPrimaryContent'
-      fetchDataTask=fetchPrimaryContent
-      queryParams=queryParams
+      getData=executePromise
       renderCallback=(action 'contentRenderCallback') as |renderHash|
     }}
       {{#renderHash.loader-state}}
@@ -35,7 +34,7 @@
   @class sequential-render
   @public
   @yield {Hash} hash
-  @yield {Any} hash.content The response from performing fetchDataTask.
+  @yield {Any} hash.content The response from performing getData.
   @yield {boolean} hash.isContentLoading Flag to check the loading state of the data fetch.
   @yield {component} hash.render-content Block component used to render the content of the item.
         Accepts loaderClass as an argument. This class can be used to style the subsequent loading states for the item.  
@@ -102,6 +101,7 @@ export default Component.extend({
     Set this to false if you only need the component to render the content.
 
     @argument asyncRender
+    @deprecated presence of getData attribute implies async operation
     @type boolean
     @public
     @default true
@@ -109,9 +109,19 @@ export default Component.extend({
   asyncRender: true,
 
   /**
+    The function that performs all the required asynchronous actions and returns a promise.
+
+    @argument getData
+    @type function
+    @public
+  */
+  getData: null,
+
+  /**
     ember-concurrency task that can be performed to fetch the required content.
 
     @argument fetchDataTask
+    @deprecated use getData instead
     @type task
     @public
   */
@@ -121,6 +131,7 @@ export default Component.extend({
     Queryparams required for fetching data. This is used as the first argument for fetchDataTask. 
 
     @argument queryParams
+    @deprecated use getData instead
     @type object
     @public
   */
@@ -130,6 +141,7 @@ export default Component.extend({
     Additional options required for fetchDataTask. This is the second argument while performing it.
 
     @argument taskOptions
+    @deprecated use getData instead
     @public
   */
   taskOptions: undefined,
@@ -232,7 +244,7 @@ export default Component.extend({
         get(this, 'renderStates').addToQueue(renderPriority, taskName);
       }
 
-      if (asyncRender && !renderImmediately) {
+      if ((asyncRender || get(this, 'getData')) && !renderImmediately) {
         get(this, 'fetchData').perform();
       } else {
         this.updateRenderStates();
@@ -242,7 +254,14 @@ export default Component.extend({
 
   fetchData: task(function* () {
     let { queryParams, taskOptions } = getProperties(this, 'queryParams', 'taskOptions');
-    let content = yield get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+    let content;
+    try {
+      let promise = get(this, 'getData') ? get(this, 'getData')()
+        :  get(this, 'fetchDataTask').perform(queryParams, taskOptions);
+      content = yield promise;
+    } catch (error) {
+      throw new Error(`Error occured when executing fetchData: ${error}`);
+    }
 
     set(this, 'content', content);
     if (!(isNone(content) && get(this, 'renderPriority') === criticalRender)) {

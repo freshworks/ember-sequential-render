@@ -47,15 +47,15 @@ setupController(controller) {
 
 In this example, the critical or hero element is the content inside the left pane. So that'll be assigned a renderPriority of 0. Subsequently, the quick notes and the participants list will be assigned a renderPriority of 1.
 
-## 4. Wrap the content in sequential-render instances and pass in the required tasks to fetch data
+## 4. Wrap the content in sequential-render instances and pass in a function that returns a promise
 
 ```
 <div class="flex1 schoolroom__mainpanel">
   <h2 class="maintitle">Dumbledore's Army</h2>
   {{#sequential-render
     renderPriority=0
-    taskName="fetchSpellWork"
-    fetchDataTask=fetchSpellWork as |spellHash|
+    taskName="getSpellWork"
+    getData=getSpellWork as |spellHash|
   }}
     {{#spellHash.render-content}}
       {{#each spellWork as |spell|}}
@@ -83,8 +83,8 @@ OR
   <h2 class="maintitle">Dumbledore's Army</h2>
   <sequential-render
     renderPriority={{0}}
-    taskName="fetchSpellWork"
-    fetchDataTask={{fetchSpellWork}} as |spellHash|
+    taskName="getSpellWork"
+    getData={{getSpellWork}} as |spellHash|
   >
     <spellHash.render-content>
       {{#each spellWork as |spell|}}

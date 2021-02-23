@@ -1,42 +1,48 @@
 import Controller from '@ember/controller';
-import { task } from 'ember-concurrency';
 import Participants from '../../constants/participants';
 import Notes from '../../constants/notes';
 import SpellWork from '../../constants/spellwork';
 import StaticUrl from '../../constants/static-url';
 import {
-  set
+  set,
+  get
 } from '@ember/object';
 
 export default Controller.extend({
   participantsList: null,
   spellWork: null,
   notes: '',
-  fetchParticipants: task(function* () {
-    let participants = yield fetch(StaticUrl.mockURL500)
-      .then((response) => {
-        return JSON.parse(response).participants;
+  init() {
+    this._super(...arguments);
+    this.set('getSpellWork', get(this, 'fetchSpellWork').bind(this));
+    this.set('getNotes', get(this, 'fetchNotes').bind(this));
+    this.set('getParticipants', get(this, 'fetchParticipants').bind(this));
+  },
+  fetchParticipants: async function () {
+    let participants = await fetch(StaticUrl.mockURL500)
+      .then(response => {
+        return JSON.parse(response).participants
       })
-      .catch(() => Participants)
+      .catch( () =>  Participants);
     set(this, 'participantsList', participants);
     return participants;
-  }),
-  fetchNotes: task(function* () {
-    let notes = yield fetch(StaticUrl.mockURL200)
-      .then((response) => {
-        return JSON.parse(response).notes;
+  },
+  fetchNotes: async function() {
+    let notes = await fetch(StaticUrl.mockURL200)
+      .then(response => {
+        return JSON.parse(response).notes
       })
-      .catch(() => Notes);
+      .catch( () =>  Notes);
     set(this, 'notes', notes);
     return notes;
-  }),
-  fetchSpellWork: task(function* () {
-    let spellWork = yield fetch(StaticUrl.mockURL500)
-      .then((response) => {
-        return JSON.parse(response).spellWork;
+  },
+  fetchSpellWork: async function () {
+    let spellWork = await fetch(StaticUrl.mockURL500)
+      .then(response => {
+        return JSON.parse(response).spellWork
       })
-      .catch(() => SpellWork)
+      .catch( () =>  SpellWork);
     set(this, 'spellWork', spellWork);
     return spellWork;
-  })
+  }
 });

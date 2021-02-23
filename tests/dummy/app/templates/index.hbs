@@ -27,7 +27,7 @@
     {{#sequential-render
       renderPriority=0
       taskName="priorityZero1"
-      fetchDataTask=testTaskDelay as |renderHash|
+      getData=testTaskDelay as |renderHash|
     }}
       {{#renderHash.render-content}}
         PO ELEMENT
@@ -41,7 +41,7 @@
     {{#sequential-render
       renderPriority=1
       taskName="priorityOne1"
-      fetchDataTask=testTaskDelay as |renderHash|
+      getData=testTaskDelay as |renderHash|
     }}
       {{#renderHash.render-content}}
         P1 ELEMENT
