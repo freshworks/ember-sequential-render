@@ -16,11 +16,5 @@
     "name": "v1.1.0",
     "sha": "4a10ecea5d9b0b49440540f9ad04069b4ba4f6be",
     "tag": "v1.1.0"
-  },
-  "master": {
-    "path": "versions/master",
-    "name": "master",
-    "sha": "d84f6ff119d327f5854898c4ec69f5c89ea27e44",
-    "tag": null
   }
 }
