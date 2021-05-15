@@ -46,13 +46,12 @@ import layout from '../templates/components/sequential-render';
 import { reads, or } from '@ember/object/computed';
 import { run } from '@ember/runloop';
 import {
-  set,
   computed,
   setProperties,
   get,
   getProperties
 } from '@ember/object';
-import { isNone, tryInvoke } from '@ember/utils';
+import { isNone, tryInvoke, isPresent } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency';
 import {
@@ -155,8 +154,6 @@ export default Component.extend({
   */
   renderCallback: null,
 
-  isFullFilled: false,
-
   /**
     Set this to true whenever you need to to trigger the task immediately out of its specific priority/order in the queue.
 
@@ -178,9 +175,22 @@ export default Component.extend({
   renderImmediately: false,
 
   appRenderState: reads('renderStates.renderState'),
-  isContentLoading: reads('fetchData.isRunning'),
+  isContentLoading: reads('fetchDataInstance.isRunning'),
   showFadedState: or('isContentLoading', 'priorityStatus.priorityMisMatch'),
   quickRender: or('triggerOutOfOrder', 'renderImmediately'),
+  content: reads('fetchDataInstance.value'),
+  isFullFilled: computed('fetchDataInstance.isSuccessful', 'fetchData.performCount', function() {
+    let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful');
+    return this.fetchData.performCount > 0 ? true : dataFetchSuccessFull;
+  }),
+  fetchDataInstance: computed('context', 'triggerOutOfOrder', 'renderImmediately', {
+    get() {
+      return this._checkPriorityFetch();
+    },
+    set(key, value) {
+      return value;
+    }
+  }),
   priorityStatus: computed('renderPriority', 'appRenderState', function() {
     let {
       renderPriority,
@@ -196,16 +206,8 @@ export default Component.extend({
 
   init() {
     this._super(...arguments);
-    let _renderStateChangeCallback = this._onRenderStateChange.bind(this);
-    setProperties(this, {
-      content: [],
-      _renderStateChangeCallback
-    });
-    get(this, 'renderStates').on(RENDER_STATE_CHANGE_EVENT, _renderStateChangeCallback);
-  },
-
-  didReceiveAttrs() {
-    this._checkTaskPriority();
+    this._renderStateChangeCallback = this._onRenderStateChange.bind(this);
+    get(this, 'renderStates').on(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
 
   didDestroyElement() {
@@ -220,11 +222,10 @@ export default Component.extend({
     renderStates.off(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
 
-  _checkTaskPriority() {
+  _checkPriorityFetch() {
     if (this.isDestroyed || this.isDestroying) {
       return;
     }
-
     let {
       priorityStatus: { priorityHit },
       renderPriority,
@@ -246,7 +247,7 @@ export default Component.extend({
     let isPresentInQueue = renderStates.isPresentInQueue(renderPriority, taskName);
 
     if ((priorityHit && isPresentInQueue) || quickRender) {
-      this._performRenderFetch();
+      return this.fetchData.perform();
     }
   },
 
@@ -256,37 +257,39 @@ export default Component.extend({
     }
     let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
     if (this.priorityStatus.exactMatch && isPresentInQueue) {
-      return this._performRenderFetch();
-    }
-  },
-
-  _performRenderFetch() {
-    let {
-      asyncRender,
-      renderImmediately
-    } = getProperties(this, 'asyncRender', 'renderImmediately');
-    if ((asyncRender || get(this, 'getData')) && !renderImmediately) {
-      get(this, 'fetchData').perform();
-    } else {
-      this.updateRenderStates();
+      this.fetchDataInstance = this.fetchData.perform();
     }
   },
 
   fetchData: task(function* () {
-    let { queryParams, taskOptions } = getProperties(this, 'queryParams', 'taskOptions');
+    let {
+      queryParams,
+      taskOptions,
+      asyncRender,
+      renderImmediately
+    } = getProperties(this, 'queryParams', 'taskOptions', 'asyncRender', 'renderImmediately');
+
     let content;
-    try {
-      let promise = get(this, 'getData') ? get(this, 'getData')()
-        :  get(this, 'fetchDataTask').perform(queryParams, taskOptions);
-      content = yield promise;
-    } catch (error) {
-      throw new Error(`Error occured when executing fetchData: ${error}`);
+    if (!renderImmediately) {
+      try {
+        let promise = (asyncRender & this.fetchDataTask) 
+          ? this.fetchDataTask.perform(queryParams, taskOptions)
+          : tryInvoke(this, 'getData');
+        if (isPresent(promise)) {
+          content = yield promise;
+        }
+      } catch (error) {
+        throw new Error(`Error occured when executing fetchData: ${error}`);
+      }
+
     }
 
-    set(this, 'content', content);
-    if (!(isNone(content) && get(this, 'renderPriority') === criticalRender)) {
+    let validState = renderImmediately || (!this.getData && !asyncRender)
+      || !(isNone(content) && this.renderPriority === criticalRender)
+    if (validState) {
       this.updateRenderStates();
     }
+    return content || [];
   }).restartable(),
 
   reportRenderState() {
@@ -300,7 +303,6 @@ export default Component.extend({
 
       
       renderStates.removeScheduledCall(taskName);
-
       tryInvoke(this, 'renderCallback', [this.content])
 
       if (!quickRender) {
@@ -315,12 +317,10 @@ export default Component.extend({
   },
 
   updateRenderStates() {
-    set(this, 'isFullFilled', true);
-
     let runNext = run.next(() => {
       this.reportRenderState();
     });
-    get(this, 'renderStates').addScheduledCall(get(this, 'taskName'), runNext);
+    this.renderStates.addScheduledCall(this.taskName, runNext);
   }
 });
 
