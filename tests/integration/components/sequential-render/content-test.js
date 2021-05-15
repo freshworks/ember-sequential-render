@@ -43,7 +43,7 @@ module('Integration | Component | sequential-render/content', function(hooks) {
       assert.dom('[data-test-id="yielded-content"]').exists('Check yielded content');
     });
 
-    test('Check loaderClass behaviour whithout fadedState', async function(assert) {
+    test('Check loaderClass behaviour without fadedState', async function(assert) {
       await render(hbs`
         <SequentialRender::Content @loaderClass='loading-content' @isFullFilled=true>
           <div data-test-id="yielded-content"> template block text </div>
