@@ -52,7 +52,7 @@ import {
   get,
   getProperties
 } from '@ember/object';
-import { isNone } from '@ember/utils';
+import { isNone, tryInvoke } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency';
 import {
@@ -301,9 +301,7 @@ export default Component.extend({
       
       renderStates.removeScheduledCall(taskName);
 
-      if (get(this, 'renderCallback')) {
-        get(this, 'renderCallback')(get(this, 'content'));
-      }
+      tryInvoke(this, 'renderCallback', [this.content])
 
       if (!quickRender) {
         renderStates.removeFromQueueAndModifyRender(renderPriority, taskName);
