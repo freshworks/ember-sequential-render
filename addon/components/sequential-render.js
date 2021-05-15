@@ -185,7 +185,7 @@ export default Component.extend({
   }),
   fetchDataInstance: computed('context', 'triggerOutOfOrder', 'renderImmediately', {
     get() {
-      return this._checkPriorityFetch();
+      return this.quickRenderState ? this._handleQuickRender() : this._checkPriorityFetch();
     },
     set(key, value) {
       return value;
@@ -250,6 +250,11 @@ export default Component.extend({
       return this.fetchData.perform();
     }
   },
+  
+  _handleQuickRender() {
+    this.quickRenderState = false;
+    return this.fetchData.lastSuccessful;
+  },
 
   _onRenderStateChange() {
     if (this.isDestroyed || this.isDestroying) {
@@ -305,14 +310,16 @@ export default Component.extend({
       renderStates.removeScheduledCall(taskName);
       tryInvoke(this, 'renderCallback', [this.content])
 
-      if (!quickRender) {
+      if (quickRender) {
+        setProperties(this, {
+          renderImmediately: false,
+          triggerOutOfOrder: false,
+          quickRenderState: true
+        });
+      } else {
         renderStates.removeFromQueueAndModifyRender(renderPriority, taskName);
       }
 
-      setProperties(this, {
-        renderImmediately: false,
-        triggerOutOfOrder: false
-      });
     }
   },
 
