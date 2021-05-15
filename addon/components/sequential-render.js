@@ -181,7 +181,7 @@ export default Component.extend({
   content: reads('fetchDataInstance.value'),
   isFullFilled: computed('fetchDataInstance.isSuccessful', 'fetchData.performCount', function() {
     let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful');
-    return this.fetchData.performCount > 0 ? true : dataFetchSuccessFull;
+    return this.fetchData.performCount > 1 ? true : dataFetchSuccessFull;
   }),
   fetchDataInstance: computed('context', 'triggerOutOfOrder', 'renderImmediately', {
     get() {
