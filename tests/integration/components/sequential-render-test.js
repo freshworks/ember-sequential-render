@@ -257,7 +257,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{0}}
         @taskName="Task1"
-        @fetchDataTask={{this.fetchDataTask}}
+        @asyncRender={{false}}
         @renderCallback={{this.afterTask1}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
