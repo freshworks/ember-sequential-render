@@ -154,7 +154,7 @@ export default Service.extend(Evented, {
     let modifyState = this.removeFromQueue(priority, taskName);
 
     if (modifyState) {
-      this.modifyRenderState(priority + 1);
+      this.modifyRenderState(this.renderState + 1);
     }
   },
 
@@ -184,6 +184,13 @@ export default Service.extend(Evented, {
 
     availablePriorities.addObject(priority);
     return isPresent(taskName) && !priorityQueue.includes(taskName);
+  },
+
+  isPresentInQueue(priority, taskName) {
+    let renderQueue = get(this, 'renderQueue');
+    let priorityQueue = renderQueue[priority] || A();
+
+    return isPresent(taskName) && priorityQueue.includes(taskName);
   },
   
   /**

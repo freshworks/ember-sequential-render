@@ -35,24 +35,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
     setupOnerror();
   });
 
-  test('it renders', async function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
-
-    await render(hbs`<SequentialRender />`);
-
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      <SequentialRender>
-        template block text
-      </SequentialRender>
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
-  });
-
   test('Check order of execution when no async task is present', async function(assert) {
     await render(hbs `
       {{#sequential-render
@@ -282,6 +264,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         </SequentialRenderItem.loader-state>
       </SequentialRender>
       `)
+      await settled();
       this.set('renderImmediately', true);
       await settled();
       assert.verifySteps(['first', 'third', 'second', 'third']);
@@ -330,6 +313,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         </SequentialRenderItem.loader-state>
       </SequentialRender>
       `)
+      await settled();
       this.set('triggerOutOfOrder', true);
       await settled();
       assert.verifySteps(['first', 'third', 'second', 'third']);

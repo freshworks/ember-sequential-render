@@ -188,19 +188,20 @@ export default Component.extend({
     } = getProperties(this, 'renderPriority', 'appRenderState');
 
     return {
-      priorityHit: renderPriority === appRenderState,
+      priorityHit: renderPriority <= appRenderState,
+      exactMatch: renderPriority === appRenderState,
       priorityMisMatch: renderPriority > appRenderState
     };
   }),
 
   init() {
     this._super(...arguments);
-    let priorityChangeCallback = this._checkTaskPriority.bind(this);
+    let _renderStateChangeCallback = this._onRenderStateChange.bind(this);
     setProperties(this, {
       content: [],
-      priorityChangeCallback
+      _renderStateChangeCallback
     });
-    get(this, 'renderStates').on(RENDER_STATE_CHANGE_EVENT, priorityChangeCallback);
+    get(this, 'renderStates').on(RENDER_STATE_CHANGE_EVENT, _renderStateChangeCallback);
   },
 
   didReceiveAttrs() {
@@ -216,7 +217,7 @@ export default Component.extend({
       taskName
     } = getProperties(this, 'renderStates', 'renderPriority', 'taskName');
     renderStates.removeFromQueue(renderPriority, taskName);
-    renderStates.off(RENDER_STATE_CHANGE_EVENT, this.priorityChangeCallback);
+    renderStates.off(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
 
   _checkTaskPriority() {
@@ -226,29 +227,48 @@ export default Component.extend({
 
     let {
       priorityStatus: { priorityHit },
-      asyncRender,
       renderPriority,
       taskName,
       quickRender,
-      renderImmediately
+      renderStates
     } = getProperties(this,
       'asyncRender', 'priorityStatus', 'renderImmediately',
-      'quickRender', 'renderPriority', 'taskName');
+      'quickRender', 'renderPriority', 'taskName', 'renderStates');
 
-    get(this, 'renderStates').updateMaxRenderPriority(renderPriority);
+    renderStates.updateMaxRenderPriority(renderPriority);
 
-    if (get(this, 'renderStates').isAssignableTask(renderPriority, taskName)
-          && (priorityHit || quickRender)) {
+    let isAssignable = renderStates.isAssignableTask(renderPriority, taskName);
 
-      if (!quickRender) {
-        get(this, 'renderStates').addToQueue(renderPriority, taskName);
-      }
+    if (isAssignable && !quickRender) {
+      renderStates.addToQueue(renderPriority, taskName);
+    }
 
-      if ((asyncRender || get(this, 'getData')) && !renderImmediately) {
-        get(this, 'fetchData').perform();
-      } else {
-        this.updateRenderStates();
-      }
+    let isPresentInQueue = renderStates.isPresentInQueue(renderPriority, taskName);
+
+    if ((priorityHit && isPresentInQueue) || quickRender) {
+      this._performRenderFetch();
+    }
+  },
+
+  _onRenderStateChange() {
+    if (this.isDestroyed || this.isDestroying) {
+      return;
+    }
+    let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
+    if (this.priorityStatus.exactMatch && isPresentInQueue) {
+      return this._performRenderFetch();
+    }
+  },
+
+  _performRenderFetch() {
+    let {
+      asyncRender,
+      renderImmediately
+    } = getProperties(this, 'asyncRender', 'renderImmediately');
+    if ((asyncRender || get(this, 'getData')) && !renderImmediately) {
+      get(this, 'fetchData').perform();
+    } else {
+      this.updateRenderStates();
     }
   },
 
