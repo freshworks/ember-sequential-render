@@ -60,9 +60,13 @@ export default Service.extend(Evented, {
       availablePriorities: A(),
       scheduledCalls: {},
       maxRenderPriority: MAX_RENDER_PRIORITY,
-      // We need't trigger state change for reset. It should be handled through the context change.
       renderState: CRITICAL_RENDER_STATE
     })
+  },
+
+  _clearScheduledCalls() {
+    let scheduledCalls = get(this, 'scheduledCalls');
+    Object.values(scheduledCalls).forEach(call => cancel(call));
   },
 
   updateMaxRenderPriority(state) {
@@ -88,9 +92,9 @@ export default Service.extend(Evented, {
     @public
   */
   resetRenderState() {
-    let scheduledCalls = get(this, 'scheduledCalls');
-    Object.values(scheduledCalls).forEach(call => cancel(call));
+    this._clearScheduledCalls();
     this._resetProperties();
+    this.triggerRenderStateChange(CRITICAL_RENDER_STATE);
   },
   modifyRenderState(state) {
     let {
@@ -131,6 +135,12 @@ export default Service.extend(Evented, {
   removeScheduledCall(taskName) {
     let scheduledCalls = get(this, 'scheduledCalls');
     delete scheduledCalls[taskName];
+  },
+
+  addAssignableToQueue(priority, taskName) {
+    this.updateMaxRenderPriority(priority);
+    this.availablePriorities.addObject(priority);
+    this.addToQueue(priority, taskName)
   },
 
   addToQueue(priority, taskName) {
@@ -176,14 +186,6 @@ export default Service.extend(Evented, {
   triggerRenderStateChange(state) {
     set(this, 'renderState', state);
     this.trigger(RENDER_STATE_CHANGE_EVENT, { renderState: state });
-  },
-
-  isAssignableTask(priority, taskName) {
-    let { renderQueue, availablePriorities } = getProperties(this, 'renderQueue', 'availablePriorities');
-    let priorityQueue = renderQueue[priority] || A();
-
-    availablePriorities.addObject(priority);
-    return isPresent(taskName) && !priorityQueue.includes(taskName);
   },
 
   isPresentInQueue(priority, taskName) {

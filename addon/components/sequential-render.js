@@ -17,7 +17,6 @@
   ```handlebars
     {{#sequential-render
       renderPriority=1
-      context=pageContext
       taskName='fetchPrimaryContent'
       getData=executePromise
       renderCallback=(action 'contentRenderCallback') as |renderHash|
@@ -52,7 +51,7 @@ import {
   set,
   getProperties
 } from '@ember/object';
-import { isNone, tryInvoke } from '@ember/utils';
+import { isNone, tryInvoke, isPresent } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency';
 import {
@@ -66,14 +65,6 @@ export default Component.extend({
   renderStates: service(),
   layout,
   tagName: '',
-
-  /**
-    The primary context of the task, i.e., the dynamicSegment of the route.
-
-    @argument context
-    @public
-  */
-  context: null,
 
   /**
     The unique name of the task.
@@ -184,9 +175,9 @@ export default Component.extend({
     let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful');
     return this.fetchData.performCount > 1 ? true : dataFetchSuccessFull;
   }),
-  fetchDataInstance: computed('context', 'triggerOutOfOrder', 'renderImmediately', {
+  fetchDataInstance: computed('quickRender', {
     get() {
-      return this.quickRenderState ? this._handleQuickRender() : this._checkPriorityFetch();
+      return this.quickRender ? this.fetchData.perform() : this.fetchData.last;
     },
     set(key, value) {
       return value;
@@ -207,6 +198,7 @@ export default Component.extend({
 
   init() {
     this._super(...arguments);
+    this._addToQueue();
     this._renderStateChangeCallback = this._onRenderStateChange.bind(this);
     get(this, 'renderStates').on(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
@@ -223,6 +215,10 @@ export default Component.extend({
     renderStates.off(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
 
+  _addToQueue() {
+    this.renderStates.addAssignableToQueue(this.renderPriority, this.taskName);
+  },
+
   _checkPriorityFetch() {
     if (this.isDestroyed || this.isDestroying) {
       return;
@@ -231,39 +227,36 @@ export default Component.extend({
       priorityStatus: { priorityHit },
       renderPriority,
       taskName,
-      quickRender,
       renderStates
     } = getProperties(this,
-      'asyncRender', 'priorityStatus', 'renderImmediately',
-      'quickRender', 'renderPriority', 'taskName', 'renderStates');
+      'priorityStatus',
+      'renderPriority', 'taskName', 'renderStates');
 
-    renderStates.updateMaxRenderPriority(renderPriority);
-
-    let isAssignable = renderStates.isAssignableTask(renderPriority, taskName);
-
-    if (isAssignable && !quickRender) {
-      renderStates.addToQueue(renderPriority, taskName);
-    }
+    this._addToQueue();
 
     let isPresentInQueue = renderStates.isPresentInQueue(renderPriority, taskName);
 
-    if ((priorityHit && isPresentInQueue) || quickRender) {
+    if (priorityHit && isPresentInQueue) {
       return this.fetchData.perform();
     }
   },
   
-  _handleQuickRender() {
-    this.quickRenderState = false;
-    return this.fetchData.lastSuccessful;
-  },
-
-  _onRenderStateChange() {
+  _onRenderStateChange(event) {
     if (this.isDestroyed || this.isDestroying) {
       return;
     }
-    let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
-    if (this.priorityStatus.exactMatch && isPresentInQueue) {
-      set(this, 'fetchDataInstance', this.fetchData.perform());
+    let fetchDataInstance;
+
+    if (event.renderState === criticalRender) {
+      fetchDataInstance = this._checkPriorityFetch();
+    } else {
+      let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
+      if (this.priorityStatus.exactMatch && isPresentInQueue) {
+        fetchDataInstance =  this.fetchData.perform();
+      }
+    }
+    if (isPresent(fetchDataInstance)) {
+      set(this, 'fetchDataInstance', fetchDataInstance);
     }
   },
 
@@ -271,10 +264,9 @@ export default Component.extend({
     let {
       queryParams,
       taskOptions,
-      asyncRender,
-      renderImmediately
-    } = getProperties(this, 'queryParams', 'taskOptions', 'asyncRender', 'renderImmediately');
-
+      renderImmediately,
+      asyncRender
+    } = getProperties(this, 'queryParams', 'taskOptions', 'renderImmediately', 'asyncRender');
     let content;
     if (!renderImmediately) {
       try {
@@ -284,7 +276,6 @@ export default Component.extend({
       } catch (error) {
         throw new Error(`Error occured when executing fetchData: ${error}`);
       }
-
     }
 
     let validState = renderImmediately || (!this.getData && !asyncRender)
@@ -311,8 +302,7 @@ export default Component.extend({
       if (quickRender) {
         setProperties(this, {
           renderImmediately: false,
-          triggerOutOfOrder: false,
-          quickRenderState: true
+          triggerOutOfOrder: false
         });
       } else {
         renderStates.removeFromQueueAndModifyRender(renderPriority, taskName);
