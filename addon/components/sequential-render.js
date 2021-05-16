@@ -278,7 +278,7 @@ export default Component.extend({
     let content;
     if (!renderImmediately) {
       try {
-        content = (asyncRender & this.fetchDataTask)
+        content = (asyncRender && this.fetchDataTask)
           ? yield get(this, 'fetchDataTask').perform(queryParams, taskOptions)
           : yield tryInvoke(this, 'getData');
       } catch (error) {
