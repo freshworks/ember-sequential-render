@@ -35,24 +35,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
     setupOnerror();
   });
 
-  test('it renders', async function(assert) {
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.set('myAction', function(val) { ... });
-
-    await render(hbs`<SequentialRender />`);
-
-    assert.equal(this.element.textContent.trim(), '');
-
-    // Template block usage:
-    await render(hbs`
-      <SequentialRender>
-        template block text
-      </SequentialRender>
-    `);
-
-    assert.equal(this.element.textContent.trim(), 'template block text');
-  });
-
   test('Check order of execution when no async task is present', async function(assert) {
     await render(hbs `
       {{#sequential-render
@@ -95,9 +77,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
-        <seq.RenderContent>
+        <seq.render-content>
           <h1>Render Second</h1>
-        </seq.RenderContent>
+        </seq.render-content>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -106,9 +88,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >
-      <seq1.RenderContent>
+      <seq1.render-content>
         <h1>Render Second</h1>
-      </seq1.RenderContent>
+      </seq1.render-content>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -117,9 +99,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
-      <seq1.RenderContent>
+      <seq1.render-content>
         <h1>Render Second</h1>
-      </seq1.RenderContent>
+      </seq1.render-content>
       </SequentialRender>
       `)
       assert.verifySteps(['first', 'third', 'second']);
@@ -134,9 +116,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
-        <seq.RenderContent>
+        <seq.render-content>
           <h1>Render Second</h1>
-        </seq.RenderContent>
+        </seq.render-content>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -145,9 +127,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >
-      <seq1.RenderContent>
+      <seq1.render-content>
         <h1>Render Second</h1>
-      </seq1.RenderContent>
+      </seq1.render-content>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -156,9 +138,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
-      <seq1.RenderContent>
+      <seq1.render-content>
         <h1>Render Second</h1>
-      </seq1.RenderContent>
+      </seq1.render-content>
       </SequentialRender>
       `)
       assert.verifySteps(['first', 'third', 'second']);
@@ -173,9 +155,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
-        <seq.RenderContent>
+        <seq.render-content>
           <h1>Render Second</h1>
-        </seq.RenderContent>
+        </seq.render-content>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -184,9 +166,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >
-      <seq1.RenderContent>
+      <seq1.render-content>
         <h1>Render Second</h1>
-      </seq1.RenderContent>
+      </seq1.render-content>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -195,30 +177,12 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
-      <seq1.RenderContent>
+      <seq1.render-content>
         <h1>Render Second</h1>
-      </seq1.RenderContent>
+      </seq1.render-content>
       </SequentialRender>
       `)
       assert.verifySteps(['first', 'third', 'second']);
-  });
-
-  test('Check error is throw when getData is not a function', async function(assert) {
-    setupOnerror(function(err) {
-      assert.equal(err.message, 'Error occured when executing fetchData: TypeError: Ember.get(...) is not a function');
-    });
-    await render(hbs `
-      <SequentialRender
-        @renderPriority={{0}}
-        @taskName="task1"
-        @getData={{this.getDataNotFunction}}
-        as |seq1|
-      >
-      <seq1.RenderContent>
-        <h1>Render Second</h1>
-      </seq1.RenderContent>
-      </SequentialRender>
-      `)
   });
 
   test('Check error caught when getData throws some error', async function(assert) {
@@ -232,9 +196,9 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @getData={{this.getDataThrowsError}}
         as |seq1|
       >
-      <seq1.RenderContent>
+      <seq1.render-content>
         <h1>Render Second</h1>
-      </seq1.RenderContent>
+      </seq1.render-content>
       </SequentialRender>
       `)
   });
@@ -282,6 +246,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         </SequentialRenderItem.loader-state>
       </SequentialRender>
       `)
+      await settled();
       this.set('renderImmediately', true);
       await settled();
       assert.verifySteps(['first', 'third', 'second', 'third']);
@@ -292,7 +257,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{0}}
         @taskName="Task1"
-        @fetchDataTask={{this.fetchDataTask}}
+        @asyncRender={{false}}
         @renderCallback={{this.afterTask1}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
@@ -330,6 +295,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         </SequentialRenderItem.loader-state>
       </SequentialRender>
       `)
+      await settled();
       this.set('triggerOutOfOrder', true);
       await settled();
       assert.verifySteps(['first', 'third', 'second', 'third']);

@@ -152,20 +152,6 @@ module('Unit | Service | render-states', function(hooks) {
 
       assert.ok(renderStateCallback.calledWith({ renderState: 2 }), 'Test that renderStateModified event is published + consumed');
     });
-
-    test('removeFromQueueAndModifyRender: Test that app renderState is not downgraded', function(assert) {
-      let service = this.owner.lookup('service:render-states');
-      let renderStateCallback = sinon.spy();
-      service.on('renderStateModified', renderStateCallback);
-      service.availablePriorities = [0, 2];
-      service.renderState = 2;
-      service.addToQueue(0, 'uniqueP0Task1');
-      service.addToQueue(2, 'uniqueP2Task2');
-
-      service.removeFromQueueAndModifyRender(0, 'uniqueP0Task1')
-
-      assert.notOk(renderStateCallback.calledOnce, 'Test that renderStateModified event is not published');
-    });
   });
 
   module('Test post render calback flows', function() {

@@ -60,9 +60,13 @@ export default Service.extend(Evented, {
       availablePriorities: A(),
       scheduledCalls: {},
       maxRenderPriority: MAX_RENDER_PRIORITY,
-      // We need't trigger state change for reset. It should be handled through the context change.
       renderState: CRITICAL_RENDER_STATE
     })
+  },
+
+  _clearScheduledCalls() {
+    let scheduledCalls = get(this, 'scheduledCalls');
+    Object.values(scheduledCalls).forEach(call => cancel(call));
   },
 
   updateMaxRenderPriority(state) {
@@ -88,9 +92,9 @@ export default Service.extend(Evented, {
     @public
   */
   resetRenderState() {
-    let scheduledCalls = get(this, 'scheduledCalls');
-    Object.values(scheduledCalls).forEach(call => cancel(call));
+    this._clearScheduledCalls();
     this._resetProperties();
+    this.triggerRenderStateChange(CRITICAL_RENDER_STATE);
   },
   modifyRenderState(state) {
     let {
@@ -133,6 +137,12 @@ export default Service.extend(Evented, {
     delete scheduledCalls[taskName];
   },
 
+  addAssignableToQueue(priority, taskName) {
+    this.updateMaxRenderPriority(priority);
+    this.availablePriorities.addObject(priority);
+    this.addToQueue(priority, taskName)
+  },
+
   addToQueue(priority, taskName) {
     let renderQueue = get(this, 'renderQueue');
     let priorityQueue = renderQueue[priority] || A();
@@ -154,7 +164,7 @@ export default Service.extend(Evented, {
     let modifyState = this.removeFromQueue(priority, taskName);
 
     if (modifyState) {
-      this.modifyRenderState(priority + 1);
+      this.modifyRenderState(this.renderState + 1);
     }
   },
 
@@ -179,11 +189,17 @@ export default Service.extend(Evented, {
   },
 
   isAssignableTask(priority, taskName) {
-    let { renderQueue, availablePriorities } = getProperties(this, 'renderQueue', 'availablePriorities');
+    let renderQueue = get(this, 'renderQueue');
     let priorityQueue = renderQueue[priority] || A();
 
-    availablePriorities.addObject(priority);
     return isPresent(taskName) && !priorityQueue.includes(taskName);
+  },
+
+  isPresentInQueue(priority, taskName) {
+    let renderQueue = get(this, 'renderQueue');
+    let priorityQueue = renderQueue[priority] || A();
+
+    return isPresent(taskName) && priorityQueue.includes(taskName);
   },
   
   /**
