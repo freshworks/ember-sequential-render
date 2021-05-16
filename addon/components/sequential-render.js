@@ -49,6 +49,7 @@ import {
   computed,
   setProperties,
   get,
+  set,
   getProperties
 } from '@ember/object';
 import { isNone, tryInvoke, isPresent } from '@ember/utils';
@@ -178,7 +179,7 @@ export default Component.extend({
   isContentLoading: reads('fetchDataInstance.isRunning'),
   showFadedState: or('isContentLoading', 'priorityStatus.priorityMisMatch'),
   quickRender: or('triggerOutOfOrder', 'renderImmediately'),
-  content: reads('fetchDataInstance.value'),
+  content: reads('fetchData.last.value'),
   isFullFilled: computed('fetchDataInstance.isSuccessful', 'fetchData.performCount', function() {
     let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful');
     return this.fetchData.performCount > 1 ? true : dataFetchSuccessFull;
@@ -262,7 +263,7 @@ export default Component.extend({
     }
     let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
     if (this.priorityStatus.exactMatch && isPresentInQueue) {
-      this.fetchDataInstance = this.fetchData.perform();
+      set(this, 'fetchDataInstance', this.fetchData.perform());
     }
   },
 
@@ -278,7 +279,7 @@ export default Component.extend({
     if (!renderImmediately) {
       try {
         let promise = (asyncRender & this.fetchDataTask) 
-          ? this.fetchDataTask.perform(queryParams, taskOptions)
+          ? get(this, 'fetchDataTask').perform(queryParams, taskOptions)
           : tryInvoke(this, 'getData');
         if (isPresent(promise)) {
           content = yield promise;
