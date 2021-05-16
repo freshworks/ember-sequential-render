@@ -48,10 +48,9 @@ import {
   computed,
   setProperties,
   get,
-  set,
   getProperties
 } from '@ember/object';
-import { isNone, tryInvoke, isPresent } from '@ember/utils';
+import { isNone, tryInvoke } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency';
 import {
@@ -175,13 +174,8 @@ export default Component.extend({
     let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful');
     return this.fetchData.performCount > 1 ? true : dataFetchSuccessFull;
   }),
-  fetchDataInstance: computed('quickRender', {
-    get() {
-      return this.quickRender ? this.fetchData.perform() : this.fetchData.last;
-    },
-    set(key, value) {
-      return value;
-    }
+  fetchDataInstance: computed('quickRender', 'this.fetchData.last', function() {
+    return this.quickRender ? this.fetchData.perform() : this.fetchData.last;
   }),
   priorityStatus: computed('renderPriority', 'appRenderState', function() {
     let {
@@ -198,7 +192,7 @@ export default Component.extend({
 
   init() {
     this._super(...arguments);
-    this._addToQueue();
+    this._checkExecutionStatus();
     this._renderStateChangeCallback = this._onRenderStateChange.bind(this);
     get(this, 'renderStates').on(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
@@ -227,7 +221,10 @@ export default Component.extend({
   },
 
   _checkExecutionStatus() {
-    if (this.isDestroyed || this.isDestroying) {
+    if (
+      this.isDestroyed || this.isDestroying
+      || !this.renderStates.isAssignableTask(this.renderPriority, this.taskName)
+    ) {
       return;
     }
     this._addToQueue();
@@ -239,13 +236,9 @@ export default Component.extend({
     if (this.isDestroyed || this.isDestroying) {
       return;
     }
-    let fetchDataInstance = (event.renderState === criticalRender)
+    return (event.renderState === criticalRender)
       ? this._checkExecutionStatus()
       : this._executeConditionalRender(this.priorityStatus.exactMatch);
-    
-    if (isPresent(fetchDataInstance)) {
-      set(this, 'fetchDataInstance', fetchDataInstance);
-    }
   },
 
   fetchData: task(function* () {

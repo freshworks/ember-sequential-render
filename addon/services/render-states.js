@@ -188,6 +188,13 @@ export default Service.extend(Evented, {
     this.trigger(RENDER_STATE_CHANGE_EVENT, { renderState: state });
   },
 
+  isAssignableTask(priority, taskName) {
+    let renderQueue = get(this, 'renderQueue');
+    let priorityQueue = renderQueue[priority] || A();
+
+    return isPresent(taskName) && !priorityQueue.includes(taskName);
+  },
+
   isPresentInQueue(priority, taskName) {
     let renderQueue = get(this, 'renderQueue');
     let priorityQueue = renderQueue[priority] || A();
