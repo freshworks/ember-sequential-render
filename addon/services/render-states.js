@@ -60,9 +60,13 @@ export default Service.extend(Evented, {
       availablePriorities: A(),
       scheduledCalls: {},
       maxRenderPriority: MAX_RENDER_PRIORITY,
-      // We need't trigger state change for reset. It should be handled through the context change.
       renderState: CRITICAL_RENDER_STATE
     })
+  },
+
+  _clearScheduledCalls() {
+    let scheduledCalls = get(this, 'scheduledCalls');
+    Object.values(scheduledCalls).forEach(call => cancel(call));
   },
 
   updateMaxRenderPriority(state) {
@@ -88,9 +92,9 @@ export default Service.extend(Evented, {
     @public
   */
   resetRenderState() {
-    let scheduledCalls = get(this, 'scheduledCalls');
-    Object.values(scheduledCalls).forEach(call => cancel(call));
+    this._clearScheduledCalls();
     this._resetProperties();
+    this.triggerRenderStateChange(CRITICAL_RENDER_STATE);
   },
   modifyRenderState(state) {
     let {
