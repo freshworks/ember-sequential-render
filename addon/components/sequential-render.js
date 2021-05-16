@@ -52,7 +52,7 @@ import {
   set,
   getProperties
 } from '@ember/object';
-import { isNone, tryInvoke, isPresent } from '@ember/utils';
+import { isNone, tryInvoke } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency';
 import {
@@ -257,21 +257,13 @@ export default Component.extend({
     return this.fetchData.lastSuccessful;
   },
 
-  _onRenderStateChange(event) {
+  _onRenderStateChange() {
     if (this.isDestroyed || this.isDestroying) {
       return;
     }
-    let fetchDataInstance = null;
-    if (event.renderState === criticalRender) {
-      fetchDataInstance = this._checkPriorityFetch();
-    } else {
-      let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
-      if (this.priorityStatus.exactMatch && isPresentInQueue) {
-        fetchDataInstance =  this.fetchData.perform();
-      }
-    }
-    if (isPresent(fetchDataInstance)) {
-      set(this, 'fetchDataInstance', fetchDataInstance);
+    let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
+    if (this.priorityStatus.exactMatch && isPresentInQueue) {
+      set(this, 'fetchDataInstance', this.fetchData.perform());
     }
   },
 
@@ -292,6 +284,7 @@ export default Component.extend({
       } catch (error) {
         throw new Error(`Error occured when executing fetchData: ${error}`);
       }
+
     }
 
     let validState = renderImmediately || (!this.getData && !asyncRender)
