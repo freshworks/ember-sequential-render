@@ -52,7 +52,7 @@ import {
   set,
   getProperties
 } from '@ember/object';
-import { isNone, tryInvoke, isPresent } from '@ember/utils';
+import { isNone, tryInvoke } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { task } from 'ember-concurrency';
 import {
@@ -278,12 +278,9 @@ export default Component.extend({
     let content;
     if (!renderImmediately) {
       try {
-        let promise = (asyncRender & this.fetchDataTask) 
-          ? get(this, 'fetchDataTask').perform(queryParams, taskOptions)
-          : tryInvoke(this, 'getData');
-        if (isPresent(promise)) {
-          content = yield promise;
-        }
+        content = (asyncRender & this.fetchDataTask)
+          ? yield get(this, 'fetchDataTask').perform(queryParams, taskOptions)
+          : yield tryInvoke(this, 'getData');
       } catch (error) {
         throw new Error(`Error occured when executing fetchData: ${error}`);
       }
