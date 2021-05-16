@@ -209,10 +209,6 @@ export default Component.extend({
     renderStates.off(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
 
-  _addToQueue() {
-    this.renderStates.addAssignableToQueue(this.renderPriority, this.taskName);
-  },
-
   _executeConditionalRender(isMatched) {
     let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
     if (isMatched && isPresentInQueue) {
@@ -227,7 +223,7 @@ export default Component.extend({
     ) {
       return;
     }
-    this._addToQueue();
+    this.renderStates.addAssignableToQueue(this.renderPriority, this.taskName);
 
     return this._executeConditionalRender(this.priorityStatus.priorityHit);
   },
