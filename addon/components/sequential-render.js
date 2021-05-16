@@ -166,12 +166,12 @@ export default Component.extend({
   renderImmediately: false,
 
   appRenderState: reads('renderStates.renderState'),
-  isContentLoading: reads('fetchDataInstance.isRunning'),
+  isContentLoading: reads('fetchData.isRunning'),
   showFadedState: or('isContentLoading', 'priorityStatus.priorityMisMatch'),
   quickRender: or('triggerOutOfOrder', 'renderImmediately'),
   content: reads('fetchData.last.value'),
-  isFullFilled: computed('fetchDataInstance.isSuccessful', 'fetchData.performCount', function() {
-    let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful');
+  isFullFilled: computed('fetchDataInstance.isSuccessful', 'fetchData.{performCount,last.isSuccessful}', function() {
+    let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful') || get(this, 'fetchData.last.isSuccessful');
     return this.fetchData.performCount > 1 ? true : dataFetchSuccessFull;
   }),
   fetchDataInstance: computed('quickRender', 'this.fetchData.last', function() {
