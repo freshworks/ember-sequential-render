@@ -219,42 +219,30 @@ export default Component.extend({
     this.renderStates.addAssignableToQueue(this.renderPriority, this.taskName);
   },
 
-  _checkPriorityFetch() {
+  _executeConditionalRender(isMatched) {
+    let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
+    if (isMatched && isPresentInQueue) {
+      return this.fetchData.perform();
+    }
+  },
+
+  _checkExecutionStatus() {
     if (this.isDestroyed || this.isDestroying) {
       return;
     }
-    let {
-      priorityStatus: { priorityHit },
-      renderPriority,
-      taskName,
-      renderStates
-    } = getProperties(this,
-      'priorityStatus',
-      'renderPriority', 'taskName', 'renderStates');
-
     this._addToQueue();
 
-    let isPresentInQueue = renderStates.isPresentInQueue(renderPriority, taskName);
-
-    if (priorityHit && isPresentInQueue) {
-      return this.fetchData.perform();
-    }
+    return this._executeConditionalRender(this.priorityStatus.priorityHit);
   },
   
   _onRenderStateChange(event) {
     if (this.isDestroyed || this.isDestroying) {
       return;
     }
-    let fetchDataInstance;
-
-    if (event.renderState === criticalRender) {
-      fetchDataInstance = this._checkPriorityFetch();
-    } else {
-      let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
-      if (this.priorityStatus.exactMatch && isPresentInQueue) {
-        fetchDataInstance =  this.fetchData.perform();
-      }
-    }
+    let fetchDataInstance = (event.renderState === criticalRender)
+      ? this._checkExecutionStatus()
+      : this._executeConditionalRender(this.priorityStatus.exactMatch);
+    
     if (isPresent(fetchDataInstance)) {
       set(this, 'fetchDataInstance', fetchDataInstance);
     }
