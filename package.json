@@ -13,7 +13,7 @@
     "url": "https://github.com/freshworks/ember-sequential-render.git"
   },
   "license": "MIT",
-  "author": "Kanalveli Ramachandran <kanalveli.ramachandran@freshworks.com",
+  "author": "Kanalveli Ramachandran <kanalveli.ramachandran@freshworks.com>",
   "directories": {
     "doc": "doc",
     "test": "tests"
