@@ -1,11 +1,11 @@
 {{yield (hash
-  content=content
-  isContentLoading=isContentLoading
+  content=this.content
+  isContentLoading=this.isContentLoading
   render-content=(component "sequential-render/content"
-    isFullFilled=isFullFilled
-    showFadedState=showFadedState
+    isFullFilled=this.isFullFilled
+    showFadedState=this.showFadedState
   )
   loader-state=(component "sequential-render/loader-state"
-    isFullFilled=isFullFilled
+    isFullFilled=this.isFullFilled
   )
 )}}
