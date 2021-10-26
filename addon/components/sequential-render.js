@@ -66,6 +66,14 @@ export default Component.extend({
   tagName: '',
 
   /**
+    The primary context of the task, i.e., the dynamicSegment of the route.
+    @deprecated Going forward, the render queuing will be based on events triggered
+    @argument context
+    @public
+  */
+  context: null,
+
+  /**
     The unique name of the task.
     @argument taskName
     @type string
