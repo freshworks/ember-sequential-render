@@ -42,4 +42,4 @@ jobs:
       run: yarn
 
     - name: Run test suite
-      run: yarn test
+      run: yarn test:ember
