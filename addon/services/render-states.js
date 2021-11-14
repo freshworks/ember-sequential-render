@@ -65,12 +65,12 @@ export default Service.extend(Evented, {
   },
 
   _clearScheduledCalls() {
-    let scheduledCalls = get(this, 'scheduledCalls');
+    let scheduledCalls = this.scheduledCalls;
     Object.values(scheduledCalls).forEach(call => cancel(call));
   },
 
   updateMaxRenderPriority(state) {
-    let maxRenderPriority = get(this, 'maxRenderPriority');
+    let maxRenderPriority = this.maxRenderPriority;
 
     set(this, 'maxRenderPriority', Math.max(maxRenderPriority, state));
   },
@@ -123,7 +123,7 @@ export default Service.extend(Evented, {
    * @param {function} funtionReference - The scheduled function reference for the taskName.
    */
   addScheduledCall(taskName, funtionReference) {
-    let scheduledCalls = get(this, 'scheduledCalls');
+    let scheduledCalls = this.scheduledCalls;
     scheduledCalls[taskName] = funtionReference;
   },
 
@@ -133,7 +133,7 @@ export default Service.extend(Evented, {
    * @param {String} taskName - The name of the task to be removed
    */
   removeScheduledCall(taskName) {
-    let scheduledCalls = get(this, 'scheduledCalls');
+    let scheduledCalls = this.scheduledCalls;
     delete scheduledCalls[taskName];
   },
 
@@ -144,7 +144,7 @@ export default Service.extend(Evented, {
   },
 
   addToQueue(priority, taskName) {
-    let renderQueue = get(this, 'renderQueue');
+    let renderQueue = this.renderQueue;
     let priorityQueue = renderQueue[priority] || A();
 
     priorityQueue.addObject(taskName);
@@ -152,7 +152,7 @@ export default Service.extend(Evented, {
   },
 
   removeFromQueue(priority, taskName) {
-    let renderQueue = get(this, 'renderQueue');
+    let renderQueue = this.renderQueue;
     let priorityQueue = renderQueue[priority] || A();
 
     priorityQueue.removeObject(taskName);
@@ -189,14 +189,14 @@ export default Service.extend(Evented, {
   },
 
   isAssignableTask(priority, taskName) {
-    let renderQueue = get(this, 'renderQueue');
+    let renderQueue = this.renderQueue;
     let priorityQueue = renderQueue[priority] || A();
 
     return isPresent(taskName) && !priorityQueue.includes(taskName);
   },
 
   isPresentInQueue(priority, taskName) {
-    let renderQueue = get(this, 'renderQueue');
+    let renderQueue = this.renderQueue;
     let priorityQueue = renderQueue[priority] || A();
 
     return isPresent(taskName) && priorityQueue.includes(taskName);
@@ -239,9 +239,9 @@ export default Service.extend(Evented, {
 
   */
   performOncePostRender() {
-    if (!get(this, 'renderLater')) {
+    if (!this.renderLater) {
       set(this, 'renderLater', true);
-      let postRenderCallback = get(this, 'postRenderCallback');
+      let postRenderCallback = this.postRenderCallback;
 
       if (isPresent(postRenderCallback)) {
         postRenderCallback();

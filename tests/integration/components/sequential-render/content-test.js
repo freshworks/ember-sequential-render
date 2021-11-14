@@ -9,7 +9,7 @@ module('Integration | Component | sequential-render/content', function(hooks) {
   test('it renders', async function(assert) {
     await render(hbs`<SequentialRender::Content />`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    assert.dom(this.element).hasText('');
 
     // Template block usage:
     await render(hbs`

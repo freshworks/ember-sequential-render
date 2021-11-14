@@ -14,9 +14,9 @@ export default Controller.extend({
   notes: '',
   init() {
     this._super(...arguments);
-    this.set('getSpellWork', get(this, 'fetchSpellWork').bind(this));
-    this.set('getNotes', get(this, 'fetchNotes').bind(this));
-    this.set('getParticipants', get(this, 'fetchParticipants').bind(this));
+    this.set('getSpellWork', this.fetchSpellWork.bind(this));
+    this.set('getNotes', this.fetchNotes.bind(this));
+    this.set('getParticipants', this.fetchParticipants.bind(this));
   },
   fetchParticipants: async function () {
     let participants = await fetch(StaticUrl.mockURL500)

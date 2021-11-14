@@ -152,7 +152,7 @@ export default Component.extend({
     this._super(...arguments);
     this._checkExecutionStatus();
     this._renderStateChangeCallback = this._onRenderStateChange.bind(this);
-    get(this, 'renderStates').on(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
+    this.renderStates.on(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
   },
 
   didDestroyElement() {

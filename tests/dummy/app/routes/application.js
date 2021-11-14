@@ -6,7 +6,7 @@ export default Route.extend({
   renderStates: service(),
   actions: {
     didTransition() {
-      get(this, 'renderStates').resetRenderState();
+      this.renderStates.resetRenderState();
     }
   }
 })

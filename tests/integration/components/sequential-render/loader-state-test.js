@@ -9,7 +9,7 @@ module('Integration | Component | sequential-render/loader-state', function(hook
   test('it renders', async function(assert) {
     await render(hbs`<SequentialRender::LoaderState />`);
 
-    assert.equal(this.element.textContent.trim(), '');
+    assert.dom(this.element).hasText('');
 
     await render(hbs`
       <SequentialRender::LoaderState>
