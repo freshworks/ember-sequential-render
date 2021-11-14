@@ -1,2 +1,2 @@
-import Controller from '../docs/unoptimized'
+import Controller from '../docs/unoptimized';
 export default Controller.extend({});

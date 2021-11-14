@@ -5,6 +5,10 @@
   font-size: 14px;
 }
 
+body {
+  background-color: #fff;
+}
+
 /* Safari */
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }

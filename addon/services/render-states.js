@@ -14,40 +14,35 @@
 import { isPresent, isEmpty } from '@ember/utils';
 import { A } from '@ember/array';
 import Service from '@ember/service';
-import {
-  getProperties,
-  setProperties,
-  get,
-  set
-} from '@ember/object';
-import {
-  RENDER_PRIORITY,
-  RENDER_STATE_CHANGE_EVENT
-} from '../constants/render-states';
-import Evented from '@ember/object/evented';
+import { tracked } from '@glimmer/tracking';
+
+import { setProperties, set } from '@ember/object';
+import { RENDER_PRIORITY } from '../constants/render-states';
 import { later, cancel } from '@ember/runloop';
 
-const { critical: CRITICAL_RENDER_STATE, secondary: MAX_RENDER_PRIORITY } = RENDER_PRIORITY;
+const { critical: CRITICAL_RENDER_STATE, secondary: MAX_RENDER_PRIORITY } =
+  RENDER_PRIORITY;
 
-export default Service.extend(Evented, {
-  renderState: CRITICAL_RENDER_STATE,
-  maxRenderPriority: MAX_RENDER_PRIORITY,
+export default class RenderStates extends Service {
+  @tracked renderState = CRITICAL_RENDER_STATE;
+
+  maxRenderPriority = MAX_RENDER_PRIORITY;
 
   /**
-    * Flag to denote if the postrender callback has been executed.
-    *
-    * @field renderLater
-    * @type boolean
-    * @public
-  */
-  renderLater: false,
+   * Flag to denote if the postrender callback has been executed.
+   *
+   * @field renderLater
+   * @type boolean
+   * @public
+   */
+  renderLater = false;
 
-  postRenderCallback: null,
+  postRenderCallback = null;
 
-  init() {
-    this._super(...arguments);
+  constructor() {
+    super(...arguments);
     this._resetProperties();
-  },
+  }
 
   /**
    * @private
@@ -60,20 +55,20 @@ export default Service.extend(Evented, {
       availablePriorities: A(),
       scheduledCalls: {},
       maxRenderPriority: MAX_RENDER_PRIORITY,
-      renderState: CRITICAL_RENDER_STATE
-    })
-  },
+      renderState: CRITICAL_RENDER_STATE,
+    });
+  }
 
   _clearScheduledCalls() {
     let scheduledCalls = this.scheduledCalls;
-    Object.values(scheduledCalls).forEach(call => cancel(call));
-  },
+    Object.values(scheduledCalls).forEach((call) => cancel(call));
+  }
 
   updateMaxRenderPriority(state) {
     let maxRenderPriority = this.maxRenderPriority;
 
     set(this, 'maxRenderPriority', Math.max(maxRenderPriority, state));
-  },
+  }
 
   /**
    * This can be used to reset the render state during transitions.
@@ -95,17 +90,12 @@ export default Service.extend(Evented, {
     this._clearScheduledCalls();
     this._resetProperties();
     this.triggerRenderStateChange(CRITICAL_RENDER_STATE);
-  },
+  }
   modifyRenderState(state) {
-    let {
-      maxRenderPriority,
-      availablePriorities,
-      renderState
-    } = getProperties(this, 'maxRenderPriority', 'availablePriorities', 'renderState');
-    let isMaxPriority = (state > maxRenderPriority);
+    let isMaxPriority = state > this.maxRenderPriority;
 
-    if (availablePriorities.includes(state) || isMaxPriority) {
-      if (state > renderState && !this.isDestroyed && !this.isDestroying) {
+    if (this.availablePriorities.includes(state) || isMaxPriority) {
+      if (state > this.renderState && !this.isDestroyed && !this.isDestroying) {
         this.triggerRenderStateChange(state);
         if (isMaxPriority) {
           this.performOncePostRender();
@@ -114,7 +104,7 @@ export default Service.extend(Evented, {
     } else {
       this.modifyRenderState(state + 1);
     }
-  },
+  }
 
   /**
    * @function addScheduledCall
@@ -125,7 +115,7 @@ export default Service.extend(Evented, {
   addScheduledCall(taskName, funtionReference) {
     let scheduledCalls = this.scheduledCalls;
     scheduledCalls[taskName] = funtionReference;
-  },
+  }
 
   /**
    * @function removeScheduledCall
@@ -135,13 +125,13 @@ export default Service.extend(Evented, {
   removeScheduledCall(taskName) {
     let scheduledCalls = this.scheduledCalls;
     delete scheduledCalls[taskName];
-  },
+  }
 
   addAssignableToQueue(priority, taskName) {
     this.updateMaxRenderPriority(priority);
     this.availablePriorities.addObject(priority);
-    this.addToQueue(priority, taskName)
-  },
+    this.addToQueue(priority, taskName);
+  }
 
   addToQueue(priority, taskName) {
     let renderQueue = this.renderQueue;
@@ -149,7 +139,7 @@ export default Service.extend(Evented, {
 
     priorityQueue.addObject(taskName);
     renderQueue[priority] = priorityQueue;
-  },
+  }
 
   removeFromQueue(priority, taskName) {
     let renderQueue = this.renderQueue;
@@ -158,7 +148,7 @@ export default Service.extend(Evented, {
     priorityQueue.removeObject(taskName);
 
     return isEmpty(priorityQueue);
-  },
+  }
 
   removeFromQueueAndModifyRender(priority, taskName) {
     let modifyState = this.removeFromQueue(priority, taskName);
@@ -166,42 +156,26 @@ export default Service.extend(Evented, {
     if (modifyState) {
       this.modifyRenderState(this.renderState + 1);
     }
-  },
+  }
 
-  /**
-   * This can be used to listen to any changes in the app renderState.
-      
-    In routes/application.js,
-
-    ```
-    renderStates: service(),
-    setupController(controller) {
-      get(this, 'renderStates').on('renderStateModified', this.debugRenderEvent.bind(this));
-    }
-    ```
-
-    @method renderStateModified
-    @param {number} options.renderState The current priority being rendered in the application.
-  */
   triggerRenderStateChange(state) {
     set(this, 'renderState', state);
-    this.trigger(RENDER_STATE_CHANGE_EVENT, { renderState: state });
-  },
+  }
 
   isAssignableTask(priority, taskName) {
     let renderQueue = this.renderQueue;
     let priorityQueue = renderQueue[priority] || A();
 
     return isPresent(taskName) && !priorityQueue.includes(taskName);
-  },
+  }
 
   isPresentInQueue(priority, taskName) {
     let renderQueue = this.renderQueue;
     let priorityQueue = renderQueue[priority] || A();
 
     return isPresent(taskName) && priorityQueue.includes(taskName);
-  },
-  
+  }
+
   /**
    * This can be used to bind post render callbacks, if any, for the app.
    * This will be executed once after the highest priority item is rendered.
@@ -228,7 +202,7 @@ export default Service.extend(Evented, {
         this.performOncePostRender();
       }, fallbackTimeout);
     }
-  },
+  }
 
   /**
     performOncePostRender is called after the highest priority item is rendered for the first time
@@ -248,4 +222,4 @@ export default Service.extend(Evented, {
       }
     }
   }
-});
+}

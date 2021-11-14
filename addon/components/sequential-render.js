@@ -14,20 +14,20 @@
   Sample usage:
 
   ```handlebars
-    {{#sequential-render
-      renderPriority=1
-      taskName='fetchPrimaryContent'
-      getData=executePromise
-      renderCallback=(action 'contentRenderCallback') as |renderHash|
-    }}
-      {{#renderHash.loader-state}}
+    <SequentialRender
+      @renderPriority={{1}}
+      @taskName='fetchPrimaryContent'
+      @getData={{executePromise}}
+      @renderCallback={{action 'contentRenderCallback'}} as |renderHash|
+    >
+      <renderHash.loader-state>
         // Handle loading state if required
-      {{/renderHash.loader-state}}
-      {{#renderHash.render-content loaderClass="loader-fade"}}
+      </renderHash.loader-state>
+      <renderHash.render-content @loaderClass="loader-fade">
         // Use renderHash.content to render the content
         // Use renderHash.isContentLoading to act based on the data loading state
       {{/renderHash.render-content}}
-    {{/sequential-render}}
+    </SequentialRender>
   ```
   @class sequential-render
   @public
@@ -39,30 +39,20 @@
   @yield {component} hash.loader-state Block component used to render the loading state of the item.
 */
 
-import Component from '@ember/component';
-import layout from '../templates/components/sequential-render';
-import { reads, or } from '@ember/object/computed';
+import Component from '@glimmer/component';
 import { run } from '@ember/runloop';
-import {
-  computed,
-  setProperties,
-  get,
-  getProperties
-} from '@ember/object';
-import { isNone, tryInvoke } from '@ember/utils';
+import { setProperties } from '@ember/object';
+import { isNone } from '@ember/utils';
 import { inject as service } from '@ember/service';
-import { task } from 'ember-concurrency';
-import {
-  RENDER_PRIORITY,
-  RENDER_STATE_CHANGE_EVENT
-} from '../constants/render-states';
+import { restartableTask } from 'ember-concurrency';
+import { RENDER_PRIORITY } from '../constants/render-states';
 
 const { critical: criticalRender } = RENDER_PRIORITY;
 
-export default Component.extend({
-  renderStates: service(),
-  layout,
-  tagName: '',
+export default class SequentialRender extends Component {
+  @service renderStates;
+
+  content = null;
 
   /**
     The unique name of the task.
@@ -71,7 +61,6 @@ export default Component.extend({
     @public
     @required
   */
-  taskName: '',
 
   /**
    * Starts from 0, with 0 being a critical priority task that needs to be executed first. Priorities need not be sequential. 
@@ -83,7 +72,9 @@ export default Component.extend({
   * @default 0
   * @public
   */
-  renderPriority: criticalRender,
+  get renderPriority() {
+    return this.args.renderPriority || criticalRender;
+  }
 
   /**
     The function that performs all the required asynchronous actions and returns a promise.
@@ -92,7 +83,6 @@ export default Component.extend({
     @type function
     @public
   */
-  getData: null,
 
   /**
     A callback function to be executed after rendering is complete.
@@ -101,7 +91,6 @@ export default Component.extend({
     @type function
     @public
   */
-  renderCallback: null,
 
   /**
     Set this to true whenever you need to to trigger the task immediately out of its specific priority/order in the queue.
@@ -111,7 +100,9 @@ export default Component.extend({
     @public
     @default false
   */
-  triggerOutOfOrder: false,
+  get triggerOutOfOrder() {
+    return this.args.triggerOutOfOrder || false;
+  }
 
   /**
     Set this to true whenever you need to to render the content immediately without any data fetch.
@@ -121,128 +112,126 @@ export default Component.extend({
     @public
     @default false
   */
-  renderImmediately: false,
+  get renderImmediately() {
+    return this.args.renderImmediately || false;
+  }
 
-  appRenderState: reads('renderStates.renderState'),
-  isContentLoading: reads('fetchData.isRunning'),
-  showFadedState: or('isContentLoading', 'priorityStatus.priorityMisMatch'),
-  quickRender: or('triggerOutOfOrder', 'renderImmediately'),
-  content: reads('fetchData.last.value'),
-  isFullFilled: computed('fetchDataInstance.isSuccessful', 'fetchData.{performCount,last.isSuccessful}', function() {
-    let dataFetchSuccessFull = get(this, 'fetchDataInstance.isSuccessful') || get(this, 'fetchData.last.isSuccessful');
-    return this.fetchData.performCount > 1 ? true : dataFetchSuccessFull;
-  }),
-  fetchDataInstance: computed('quickRender', 'this.fetchData.last', function() {
-    return this.quickRender ? this.fetchData.perform() : this.fetchData.last;
-  }),
-  priorityStatus: computed('renderPriority', 'appRenderState', function() {
-    let {
-      renderPriority,
-      appRenderState
-    } = getProperties(this, 'renderPriority', 'appRenderState');
+  get appRenderState() {
+    return this.renderStates.renderState;
+  }
 
+  get isContentLoading() {
+    return this.fetchDataInstance?.isRunning;
+  }
+
+  get showFadedState() {
+    return this.isContentLoading || this.priorityStatus.priorityMisMatch;
+  }
+
+  get quickRender() {
+    return this.args.triggerOutOfOrder || this.args.renderImmediately;
+  }
+
+  get priorityStatus() {
     return {
-      priorityHit: renderPriority <= appRenderState,
-      exactMatch: renderPriority === appRenderState,
-      priorityMisMatch: renderPriority > appRenderState
+      priorityHit: this.renderPriority <= this.appRenderState,
+      exactMatch: this.renderPriority === this.appRenderState,
+      priorityMisMatch: this.renderPriority > this.appRenderState,
     };
-  }),
+  }
 
-  init() {
-    this._super(...arguments);
-    this._checkExecutionStatus();
-    this._renderStateChangeCallback = this._onRenderStateChange.bind(this);
-    this.renderStates.on(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
-  },
+  get fetchDataInstance() {
+    let fetchDataInstance = this.quickRender
+      ? this.fetchData.perform()
+      : this.appRenderState === criticalRender
+      ? this._checkExecutionStatus()
+      : this._executeConditionalRender(this.priorityStatus.exactMatch);
+    return fetchDataInstance || this.fetchData?.last;
+  }
 
-  didDestroyElement() {
-    this._super(...arguments);
+  get isFullFilled() {
+    return (
+      this.fetchDataInstance?.isSuccessful || this.fetchData.performCount > 1
+    );
+  }
 
-    let {
-      renderStates,
-      renderPriority,
-      taskName
-    } = getProperties(this, 'renderStates', 'renderPriority', 'taskName');
-    renderStates.removeFromQueue(renderPriority, taskName);
-    renderStates.off(RENDER_STATE_CHANGE_EVENT, this._renderStateChangeCallback);
-  },
+  willDestroy() {
+    super.willDestroy(...arguments);
+
+    this.renderStates.removeFromQueue(this.renderPriority, this.args.taskName);
+  }
 
   _executeConditionalRender(isMatched) {
-    let isPresentInQueue = this.renderStates.isPresentInQueue(this.renderPriority, this.taskName);
+    let isPresentInQueue = this.renderStates.isPresentInQueue(
+      this.renderPriority,
+      this.args.taskName
+    );
     if (isMatched && isPresentInQueue) {
       return this.fetchData.perform();
     }
-  },
+  }
 
   _checkExecutionStatus() {
     if (
-      this.isDestroyed || this.isDestroying
-      || !this.renderStates.isAssignableTask(this.renderPriority, this.taskName)
+      this.isDestroyed ||
+      this.isDestroying ||
+      !this.renderStates.isAssignableTask(
+        this.renderPriority,
+        this.args.taskName
+      )
     ) {
       return;
     }
-    this.renderStates.addAssignableToQueue(this.renderPriority, this.taskName);
+    this.renderStates.addAssignableToQueue(
+      this.renderPriority,
+      this.args.taskName
+    );
 
     return this._executeConditionalRender(this.priorityStatus.priorityHit);
-  },
-  
-  _onRenderStateChange(event) {
-    if (this.isDestroyed || this.isDestroying) {
-      return;
-    }
-    return (event.renderState === criticalRender)
-      ? this._checkExecutionStatus()
-      : this._executeConditionalRender(this.priorityStatus.exactMatch);
-  },
+  }
 
-  fetchData: task(function* () {
-    let content;
+  @restartableTask *fetchData() {
     if (!this.renderImmediately) {
       try {
-        content = yield tryInvoke(this, 'getData');
+        this.content = yield this.args.getData?.();
       } catch (error) {
         throw new Error(`Error occured when executing fetchData: ${error}`);
       }
     }
 
-    let validState = this.renderImmediately || !this.getData
-      || !(isNone(content) && this.renderPriority === criticalRender)
+    let validState =
+      this.renderImmediately ||
+      !this.args.getData ||
+      !(isNone(this.content) && this.renderPriority === criticalRender);
     if (validState) {
       this.updateRenderStates();
     }
-    return content || [];
-  }).restartable(),
+    return this.content || [];
+  }
 
   reportRenderState() {
     if (!this.isDestroyed && !this.isDestroying) {
-      let {
-        renderPriority,
-        taskName,
-        quickRender,
-        renderStates
-      } = getProperties(this, 'renderPriority', 'taskName', 'quickRender', 'renderStates');
+      this.renderStates.removeScheduledCall(this.args.taskName);
+      this.args.renderCallback?.(this.content);
 
-      
-      renderStates.removeScheduledCall(taskName);
-      tryInvoke(this, 'renderCallback', [this.content])
-
-      if (quickRender) {
+      if (this.quickRender) {
         setProperties(this, {
           renderImmediately: false,
-          triggerOutOfOrder: false
+          triggerOutOfOrder: false,
         });
       } else {
-        renderStates.removeFromQueueAndModifyRender(renderPriority, taskName);
+        this.renderStates.removeFromQueueAndModifyRender(
+          this.renderPriority,
+          this.args.taskName
+        );
       }
-
     }
-  },
+  }
 
   updateRenderStates() {
     let runNext = run.next(() => {
       this.reportRenderState();
     });
-    this.renderStates.addScheduledCall(this.taskName, runNext);
+    this.renderStates.addScheduledCall(this.args.taskName, runNext);
   }
-});
-
+}

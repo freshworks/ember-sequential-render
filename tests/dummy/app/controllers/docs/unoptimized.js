@@ -3,46 +3,42 @@ import Participants from '../../constants/participants';
 import Notes from '../../constants/notes';
 import SpellWork from '../../constants/spellwork';
 import StaticUrl from '../../constants/static-url';
-import {
-  set,
-  get
-} from '@ember/object';
 
-export default Controller.extend({
-  participantsList: null,
-  spellWork: null,
-  notes: '',
-  init() {
-    this._super(...arguments);
-    this.set('getSpellWork', this.fetchSpellWork.bind(this));
-    this.set('getNotes', this.fetchNotes.bind(this));
-    this.set('getParticipants', this.fetchParticipants.bind(this));
-  },
-  fetchParticipants: async function () {
+export default class UnoptimizedController extends Controller {
+  participantsList = null;
+  spellWork = null;
+  notes = '';
+  constructor() {
+    super(...arguments);
+    this.getSpellWork = this.fetchSpellWork.bind(this);
+    this.getNotes = this.fetchNotes.bind(this);
+    this.getParticipants = this.fetchParticipants.bind(this);
+  }
+  async fetchParticipants() {
     let participants = await fetch(StaticUrl.mockURL500)
-      .then(response => {
-        return JSON.parse(response).participants
+      .then((response) => {
+        return JSON.parse(response).participants;
       })
-      .catch( () =>  Participants);
-    set(this, 'participantsList', participants);
+      .catch(() => Participants);
+    this.participantsList = participants;
     return participants;
-  },
-  fetchNotes: async function() {
+  }
+  async fetchNotes() {
     let notes = await fetch(StaticUrl.mockURL200)
-      .then(response => {
-        return JSON.parse(response).notes
+      .then((response) => {
+        return JSON.parse(response).notes;
       })
-      .catch( () =>  Notes);
-    set(this, 'notes', notes);
+      .catch(() => Notes);
+    this.notes = notes;
     return notes;
-  },
-  fetchSpellWork: async function () {
+  }
+  async fetchSpellWork() {
     let spellWork = await fetch(StaticUrl.mockURL500)
-      .then(response => {
-        return JSON.parse(response).spellWork
+      .then((response) => {
+        return JSON.parse(response).spellWork;
       })
-      .catch( () =>  SpellWork);
-    set(this, 'spellWork', spellWork);
+      .catch(() => SpellWork);
+    this.spellWork = spellWork;
     return spellWork;
   }
-});
+}
