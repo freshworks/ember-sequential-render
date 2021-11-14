@@ -127,6 +127,15 @@ export default class RenderStates extends Service {
     delete scheduledCalls[taskName];
   }
 
+  /**
+   * @function isTaskScheduled
+   * @description checks if the task is scheduled.
+   * @param {String} taskName - The name of the task to be checked
+   */
+  isCallScheduled(taskName) {
+    return isPresent(this.scheduledCalls[taskName]);
+  }
+
   addAssignableToQueue(priority, taskName) {
     this.updateMaxRenderPriority(priority);
     this.availablePriorities.addObject(priority);

@@ -1,6 +1,6 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { render, settled } from '@ember/test-helpers';
+import { render, click } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import { setupOnerror } from '@ember/test-helpers';
 
@@ -10,9 +10,6 @@ module(
     setupRenderingTest(hooks);
     hooks.beforeEach(async function (assert) {
       this.setProperties({
-        triggerOutOfOrder: false,
-        renderImmediately: false,
-
         afterTask1: () => assert.step('first'),
         afterTask2: () => assert.step('second'),
         afterTask3: () => assert.step('third'),
@@ -36,7 +33,7 @@ module(
       <SequentialRender
         @renderPriority={{1}}
         @taskName="first"
-        @renderCallback={{afterTask1}}
+        @renderCallback={{this.afterTask1}}
         as |firstComponent|
       >
         <firstComponent.render-content>
@@ -49,7 +46,7 @@ module(
       <SequentialRender
         @renderPriority={{0}}
         @taskName="second"
-        @renderCallback={{afterTask2}}
+        @renderCallback={{this.afterTask2}}
         as |secondComponent|
       >
         <secondComponent.render-content>
@@ -170,7 +167,7 @@ module(
       </seq1.render-content>
       </SequentialRender>
       `);
-      assert.verifySteps(['first', 'third', 'second']);
+      assert.verifySteps(['first', 'second', 'third']);
     });
 
     test('Check error caught when getData throws some error', async function (assert) {
@@ -195,7 +192,7 @@ module(
       `);
     });
 
-    test('Check order of renders when renderImmediately is used', async function (assert) {
+    test('Check order of renders when retry is used', async function (assert) {
       await render(hbs`
       <SequentialRender
         @renderPriority={{0}}
@@ -210,7 +207,7 @@ module(
         </SequentialRenderItem.loader-state>
       </SequentialRender>
       <SequentialRender
-        @renderPriority={{1}}
+        @renderPriority={{2}}
         @taskName="Task2"
         @getData={{this.getData}}
         @renderCallback={{this.afterTask2}} as |SequentialRenderItem|
@@ -225,68 +222,19 @@ module(
       <SequentialRender
         @renderPriority={{1}}
         @taskName="Task3"
-        @renderImmediately={{renderImmediately}}
+        @getData={{this.getData}}
         @renderCallback={{this.afterTask3}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
-          <h1>Render Second</h1>
+          <h1>Render First</h1>
+          <button type='button' data-test-id='retry-button' {{on "click" (fn SequentialRenderItem.retry)}}>Retry</button>
         </SequentialRenderItem.render-content>
         <SequentialRenderItem.loader-state>
           Loading...
         </SequentialRenderItem.loader-state>
       </SequentialRender>
       `);
-
-      this.set('renderImmediately', true);
-      await settled();
-      assert.verifySteps(['first', 'third', 'second', 'third']);
-    });
-
-    test('Check order of renders when triggerOutOfOrder is used', async function (assert) {
-      await render(hbs`
-      <SequentialRender
-        @renderPriority={{0}}
-        @taskName="Task1"
-        @renderCallback={{this.afterTask1}} as |SequentialRenderItem|
-      >
-        <SequentialRenderItem.render-content>
-          <h1>Render First</h1>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
-          Loading...
-        </SequentialRenderItem.loader-state>
-      </SequentialRender>
-      <SequentialRender
-        @renderPriority={{1}}
-        @taskName="Task2"
-        @getData={{this.getData}}
-        @renderCallback={{this.afterTask2}} as |SequentialRenderItem|
-      >
-        <SequentialRenderItem.render-content>
-          <h1>Render Third</h1>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
-          Loading...
-        </SequentialRenderItem.loader-state>
-      </SequentialRender>
-      <SequentialRender
-        @renderPriority={{1}}
-        @taskName="Task3"
-        @triggerOutOfOrder={{triggerOutOfOrder}}
-        @getData={{this.getData}}
-        @renderCallback={{this.afterTask3}} as |SequentialRenderItem|
-      >
-        <SequentialRenderItem.render-content>
-          <h1>Render First</h1>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
-          Loading...
-        </SequentialRenderItem.loader-state>
-      </SequentialRender>
-      `);
-
-      this.set('triggerOutOfOrder', true);
-      await settled();
+      await click('[data-test-id="retry-button"]');
       assert.verifySteps(['first', 'third', 'second', 'third']);
     });
   }

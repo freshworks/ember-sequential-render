@@ -3,8 +3,6 @@
       taskName: A unique idetifier, app wide, to maintain the render queue.
       renderPriority: Numeric determinant of the order in which the various stakeholders are rendered.
   2. renderStates service is used to maintain the render queue.
-  3. set triggerOutOfOrder=true to immediately invoke the fetch and render.
-      This will not affect the current app render state.
 */
 
 /**
@@ -17,7 +15,7 @@
     <SequentialRender
       @renderPriority={{1}}
       @taskName='fetchPrimaryContent'
-      @getData={{executePromise}}
+      @getData={{this.executePromise}}
       @renderCallback={{action 'contentRenderCallback'}} as |renderHash|
     >
       <renderHash.loader-state>
@@ -37,15 +35,16 @@
   @yield {component} hash.render-content Block component used to render the content of the item.
         Accepts loaderClass as an argument. This class can be used to style the subsequent loading states for the item.  
   @yield {component} hash.loader-state Block component used to render the loading state of the item.
+  @yield {action} hash.retry Exposes an action which can be used to retry the data fetch + render process without affecting the queue / app render states..
 */
 
 import Component from '@glimmer/component';
 import { run } from '@ember/runloop';
-import { setProperties } from '@ember/object';
 import { isNone } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { restartableTask } from 'ember-concurrency';
 import { RENDER_PRIORITY } from '../constants/render-states';
+import { action } from '@ember/object';
 
 const { critical: criticalRender } = RENDER_PRIORITY;
 
@@ -92,30 +91,6 @@ export default class SequentialRender extends Component {
     @public
   */
 
-  /**
-    Set this to true whenever you need to to trigger the task immediately out of its specific priority/order in the queue.
-
-    @argument triggerOutOfOrder
-    @type boolean
-    @public
-    @default false
-  */
-  get triggerOutOfOrder() {
-    return this.args.triggerOutOfOrder || false;
-  }
-
-  /**
-    Set this to true whenever you need to to render the content immediately without any data fetch.
-
-    @argument renderImmediately
-    @type boolean
-    @public
-    @default false
-  */
-  get renderImmediately() {
-    return this.args.renderImmediately || false;
-  }
-
   get appRenderState() {
     return this.renderStates.renderState;
   }
@@ -128,10 +103,6 @@ export default class SequentialRender extends Component {
     return this.isContentLoading || this.priorityStatus.priorityMisMatch;
   }
 
-  get quickRender() {
-    return this.args.triggerOutOfOrder || this.args.renderImmediately;
-  }
-
   get priorityStatus() {
     return {
       priorityHit: this.renderPriority <= this.appRenderState,
@@ -141,11 +112,10 @@ export default class SequentialRender extends Component {
   }
 
   get fetchDataInstance() {
-    let fetchDataInstance = this.quickRender
-      ? this.fetchData.perform()
-      : this.appRenderState === criticalRender
-      ? this._checkExecutionStatus()
-      : this._executeConditionalRender(this.priorityStatus.exactMatch);
+    let fetchDataInstance =
+      this.appRenderState === criticalRender
+        ? this._checkExecutionStatus()
+        : this._executeConditionalRender(this.priorityStatus.exactMatch);
     return fetchDataInstance || this.fetchData?.last;
   }
 
@@ -166,7 +136,8 @@ export default class SequentialRender extends Component {
       this.renderPriority,
       this.args.taskName
     );
-    if (isMatched && isPresentInQueue) {
+    let isTaskScheduled = this.renderStates.isCallScheduled(this.args.taskName);
+    if (isMatched && isPresentInQueue && !isTaskScheduled) {
       return this.fetchData.perform();
     }
   }
@@ -190,36 +161,28 @@ export default class SequentialRender extends Component {
     return this._executeConditionalRender(this.priorityStatus.priorityHit);
   }
 
-  @restartableTask *fetchData() {
-    if (!this.renderImmediately) {
-      try {
-        this.content = yield this.args.getData?.();
-      } catch (error) {
-        throw new Error(`Error occured when executing fetchData: ${error}`);
-      }
+  @restartableTask *fetchData(options) {
+    let { report = true } = options || {};
+    try {
+      this.content = yield this.args.getData?.();
+    } catch (error) {
+      throw new Error(`Error occured when executing fetchData: ${error}`);
     }
 
     let validState =
-      this.renderImmediately ||
       !this.args.getData ||
       !(isNone(this.content) && this.renderPriority === criticalRender);
     if (validState) {
-      this.updateRenderStates();
+      this.updateRenderStates({ report });
     }
     return this.content || [];
   }
 
-  reportRenderState() {
+  reportRenderState({ report = true }) {
     if (!this.isDestroyed && !this.isDestroying) {
       this.renderStates.removeScheduledCall(this.args.taskName);
       this.args.renderCallback?.(this.content);
-
-      if (this.quickRender) {
-        setProperties(this, {
-          renderImmediately: false,
-          triggerOutOfOrder: false,
-        });
-      } else {
+      if (report) {
         this.renderStates.removeFromQueueAndModifyRender(
           this.renderPriority,
           this.args.taskName
@@ -228,10 +191,15 @@ export default class SequentialRender extends Component {
     }
   }
 
-  updateRenderStates() {
+  updateRenderStates({ report = true }) {
     let runNext = run.next(() => {
-      this.reportRenderState();
+      this.reportRenderState({ report });
     });
     this.renderStates.addScheduledCall(this.args.taskName, runNext);
+  }
+
+  @action
+  retry() {
+    return this.fetchData.perform({ report: false });
   }
 }
