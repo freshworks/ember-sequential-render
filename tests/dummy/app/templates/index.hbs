@@ -54,8 +54,7 @@
   {{#demo.example name="priorityOne2.hbs"}}
     {{#sequential-render
       renderPriority=1
-      taskName="priorityOne2"
-      asyncRender=false as |renderHash|
+      taskName="priorityOne2" as |renderHash|
     }}
       {{#renderHash.render-content}}
         P1 ELEMENT [No data fetch]
@@ -68,8 +67,7 @@
   {{#demo.example name="priorityTwo1.hbs"}}
     {{#sequential-render
       renderPriority=4
-      taskName="priorityTwo1"
-      asyncRender=false as |renderHash|
+      taskName="priorityTwo1" as |renderHash|
     }}
       {{#renderHash.render-content}}
         P4 ELEMENT [No data fetch]

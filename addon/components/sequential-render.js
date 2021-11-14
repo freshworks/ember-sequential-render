@@ -2,9 +2,8 @@
   1. Both 'renderPriority' and 'taskName' are mandatory.
       taskName: A unique idetifier, app wide, to maintain the render queue.
       renderPriority: Numeric determinant of the order in which the various stakeholders are rendered.
-  2. asyncRender=false to ensure delayed prioritized render without any async fetch.
-  3. renderStates service is used to maintain the render queue.
-  4. set triggerOutOfOrder=true to immediately invoke the fetch and render.
+  2. renderStates service is used to maintain the render queue.
+  3. set triggerOutOfOrder=true to immediately invoke the fetch and render.
       This will not affect the current app render state.
 */
 
@@ -66,14 +65,6 @@ export default Component.extend({
   tagName: '',
 
   /**
-    The primary context of the task, i.e., the dynamicSegment of the route.
-    @deprecated Going forward, the render queuing will be based on events triggered
-    @argument context
-    @public
-  */
-  context: null,
-
-  /**
     The unique name of the task.
     @argument taskName
     @type string
@@ -95,18 +86,6 @@ export default Component.extend({
   renderPriority: criticalRender,
 
   /**
-    Signifies that the rendering requires asynchronous content to be fetched.
-    Set this to false if you only need the component to render the content.
-
-    @argument asyncRender
-    @deprecated presence of getData attribute implies async operation
-    @type boolean
-    @public
-    @default true
-  */
-  asyncRender: true,
-
-  /**
     The function that performs all the required asynchronous actions and returns a promise.
 
     @argument getData
@@ -114,35 +93,6 @@ export default Component.extend({
     @public
   */
   getData: null,
-
-  /**
-    ember-concurrency task that can be performed to fetch the required content.
-
-    @argument fetchDataTask
-    @deprecated use getData instead
-    @type task
-    @public
-  */
-  fetchDataTask: null,
-
-  /**
-    Queryparams required for fetching data. This is used as the first argument for fetchDataTask. 
-
-    @argument queryParams
-    @deprecated use getData instead
-    @type object
-    @public
-  */
-  queryParams: undefined,
-
-  /**
-    Additional options required for fetchDataTask. This is the second argument while performing it.
-
-    @argument taskOptions
-    @deprecated use getData instead
-    @public
-  */
-  taskOptions: undefined,
 
   /**
     A callback function to be executed after rendering is complete.
@@ -246,24 +196,16 @@ export default Component.extend({
   },
 
   fetchData: task(function* () {
-    let {
-      queryParams,
-      taskOptions,
-      renderImmediately,
-      asyncRender
-    } = getProperties(this, 'queryParams', 'taskOptions', 'renderImmediately', 'asyncRender');
     let content;
-    if (!renderImmediately) {
+    if (!this.renderImmediately) {
       try {
-        content = (asyncRender && this.fetchDataTask)
-          ? yield get(this, 'fetchDataTask').perform(queryParams, taskOptions)
-          : yield tryInvoke(this, 'getData');
+        content = yield tryInvoke(this, 'getData');
       } catch (error) {
         throw new Error(`Error occured when executing fetchData: ${error}`);
       }
     }
 
-    let validState = renderImmediately || (!this.getData && !asyncRender)
+    let validState = this.renderImmediately || !this.getData
       || !(isNone(content) && this.renderPriority === criticalRender)
     if (validState) {
       this.updateRenderStates();

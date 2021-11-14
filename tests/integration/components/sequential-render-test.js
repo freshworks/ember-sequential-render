@@ -2,7 +2,6 @@ import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
 import { render, settled } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
-import {timeout} from 'ember-concurrency';
 import { setupOnerror } from '@ember/test-helpers';
 
 module('Integration | Component | sequential-render | ComponentTest', async function(hooks) {
@@ -20,15 +19,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         }),
       getDataNoPromise: () => 'test',
       getDataNotFunction: 'test',
-      getDataThrowsError: () => { throw new Error ('myError')},
-      fetchDataTask: {
-        perform() {
-          return function*() {
-            yield timeout(200);
-            return "test";
-          }
-        }
-      }
+      getDataThrowsError: () => { throw new Error ('myError')}
     });
   });
   hooks.afterEach(function() {
@@ -40,7 +31,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       {{#sequential-render
         renderPriority=1
         taskName="first"
-        asyncRender=false
         renderCallback=afterTask1
         as |firstComponent|
       }}
@@ -54,7 +44,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       {{#sequential-render
         renderPriority=0
         taskName="second"
-        asyncRender=false
         renderCallback=afterTask2
         as |secondComponent|
       }}
@@ -73,46 +62,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{0}}
         @taskName="Task1"
-        @asyncRender={{false}}
-        @renderCallback={{this.afterTask1}}
-        as |seq|
-      >
-        <seq.render-content>
-          <h1>Render Second</h1>
-        </seq.render-content>
-      </SequentialRender>
-      <SequentialRender
-        @renderPriority={{1}}
-        @taskName="task2"
-        @fetchDataTask={{this.fetchDataTask}}
-        @renderCallback={{this.afterTask2}}
-        as |seq1|
-      >
-      <seq1.render-content>
-        <h1>Render Second</h1>
-      </seq1.render-content>
-      </SequentialRender>
-      <SequentialRender
-        @renderPriority={{1}}
-        @taskName="task3"
-        @asyncRender={{false}}
-        @renderCallback={{this.afterTask3}}
-        as |seq1|
-      >
-      <seq1.render-content>
-        <h1>Render Second</h1>
-      </seq1.render-content>
-      </SequentialRender>
-      `)
-      assert.verifySteps(['first', 'third', 'second']);
-  });
-
-  test('Check order of execution when an getData parameter which is a promise is present', async function(assert) {
-    await render(hbs `
-      <SequentialRender
-        @renderPriority={{0}}
-        @taskName="Task1"
-        @asyncRender={{false}}
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
@@ -134,7 +83,43 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{1}}
         @taskName="task3"
-        @asyncRender={{false}}
+        @renderCallback={{this.afterTask3}}
+        as |seq1|
+      >
+      <seq1.render-content>
+        <h1>Render Second</h1>
+      </seq1.render-content>
+      </SequentialRender>
+      `)
+      assert.verifySteps(['first', 'third', 'second']);
+  });
+
+  test('Check order of execution when an getData parameter which is a promise is present', async function(assert) {
+    await render(hbs `
+      <SequentialRender
+        @renderPriority={{0}}
+        @taskName="Task1"
+        @renderCallback={{this.afterTask1}}
+        as |seq|
+      >
+        <seq.render-content>
+          <h1>Render Second</h1>
+        </seq.render-content>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{1}}
+        @taskName="task2"
+        @getData={{this.getData}}
+        @renderCallback={{this.afterTask2}}
+        as |seq1|
+      >
+      <seq1.render-content>
+        <h1>Render Second</h1>
+      </seq1.render-content>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{1}}
+        @taskName="task3"
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
@@ -151,7 +136,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{0}}
         @taskName="Task1"
-        @asyncRender={{false}}
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
@@ -173,7 +157,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{1}}
         @taskName="task3"
-        @asyncRender={{false}}
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
@@ -208,7 +191,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{0}}
         @taskName="Task1"
-        @asyncRender={{false}}
         @renderCallback={{this.afterTask1}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
@@ -221,7 +203,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{1}}
         @taskName="Task2"
-        @fetchDataTask={{this.fetchDataTask}}
+        @getData={{this.getData}}
         @renderCallback={{this.afterTask2}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
@@ -235,7 +217,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderPriority={{1}}
         @taskName="Task3"
         @renderImmediately={{renderImmediately}}
-        @asyncRender={{false}}
         @renderCallback={{this.afterTask3}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
@@ -257,7 +238,6 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{0}}
         @taskName="Task1"
-        @asyncRender={{false}}
         @renderCallback={{this.afterTask1}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
@@ -270,7 +250,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
       <SequentialRender
         @renderPriority={{1}}
         @taskName="Task2"
-        @fetchDataTask={{this.fetchDataTask}}
+        @getData={{this.getData}}
         @renderCallback={{this.afterTask2}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
@@ -284,7 +264,7 @@ module('Integration | Component | sequential-render | ComponentTest', async func
         @renderPriority={{1}}
         @taskName="Task3"
         @triggerOutOfOrder={{triggerOutOfOrder}}
-        @fetchDataTask={{this.fetchDataTask}}
+        @getData={{this.getData}}
         @renderCallback={{this.afterTask3}} as |SequentialRenderItem|
       >
         <SequentialRenderItem.render-content>
