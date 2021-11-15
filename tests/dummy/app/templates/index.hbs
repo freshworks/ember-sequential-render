@@ -4,11 +4,11 @@
 <DocsDemo @class="demo-wrapper" as |demo|>
   <h2 class="title">Example 1</h2>
   <demo.example @name="demolinks">
-    <LinkTo @route="docs.unoptimized" class="demo-link">
-      Without Sequential Render
-    </LinkTo>
     <LinkTo @route="docs.optimized" class="demo-link">
       With Sequential Render
+    </LinkTo>
+    <LinkTo @route="docs.unoptimized" class="demo-link">
+      Without Sequential Render
     </LinkTo>
   </demo.example>
 </DocsDemo>

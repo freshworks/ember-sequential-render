@@ -3,9 +3,9 @@
 <div class="element-flex schoolroom">
   <div class="flex1 schoolroom__mainpanel">
     <h2 class="maintitle">Dumbledore's Army</h2>
-    <SequentialRender @renderPriority={{0}} @taskName="getSpellWork" @getData={{getSpellWork}} as |spellHash|>
+    <SequentialRender @renderPriority={{0}} @taskName="getSpellWork" @getData={{this.getSpellWork}} as |spellHash|>
       <spellHash.render-content>
-        {{#each spellWork as |spell|}}
+        {{#each this.spellWork as |spell|}}
           <div class="card">
             <div class="title">
               {{spell.name}}
@@ -26,10 +26,10 @@
       <h4 class="title">
         Participants
       </h4>
-      <SequentialRender @renderPriority={{1}} @taskName="getParticipants" @getData={{getParticipants}} as |participantsHash|>
+      <SequentialRender @renderPriority={{1}} @taskName="getParticipants" @getData={{this.getParticipants}} as |participantsHash|>
         <participantsHash.render-content>
           <div class="element-flex avatarpane">
-            {{#each participantsList as |person|}}
+            {{#each this.participantsList as |person|}}
               <div class="avatar-item" aria-label={{person.name}}>
                 <img class="element-flex avatar-image-wrapper" src={{person.avatar}} alt={{person.name}}>
               </div>
@@ -46,10 +46,10 @@
       <h4 class="title">
         Quick Notes
       </h4>
-      <SequentialRender @renderPriority={{1}} @taskName="getNotes" @getData={{getNotes}} as |notesHash|>
+      <SequentialRender @renderPriority={{1}} @taskName="getNotes" @getData={{this.getNotes}} as |notesHash|>
         <notesHash.render-content>
           <div class="editor" contenteditable="true">
-            {{notes}}
+            {{this.notes}}
           </div>
         </notesHash.render-content>
         <notesHash.loader-state>
