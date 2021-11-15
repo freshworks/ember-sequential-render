@@ -93,7 +93,6 @@ export default class RenderStates extends Service {
   }
   modifyRenderState(state) {
     let isMaxPriority = state > this.maxRenderPriority;
-
     if (this.availablePriorities.includes(state) || isMaxPriority) {
       if (state > this.renderState && !this.isDestroyed && !this.isDestroying) {
         this.triggerRenderStateChange(state);
@@ -160,9 +159,8 @@ export default class RenderStates extends Service {
   }
 
   removeFromQueueAndModifyRender(priority, taskName) {
-    let modifyState = this.removeFromQueue(priority, taskName);
-
-    if (modifyState) {
+    let isQueueEmpty = this.removeFromQueue(priority, taskName);
+    if (isQueueEmpty && this.renderState === priority) {
       this.modifyRenderState(this.renderState + 1);
     }
   }

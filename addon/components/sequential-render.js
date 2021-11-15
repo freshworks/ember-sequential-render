@@ -125,6 +125,11 @@ export default class SequentialRender extends Component {
     );
   }
 
+  constructor() {
+    super(...arguments);
+    this._checkExecutionStatus();
+  }
+
   willDestroy() {
     super.willDestroy(...arguments);
 
