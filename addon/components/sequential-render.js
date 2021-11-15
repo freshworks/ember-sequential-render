@@ -39,7 +39,7 @@
 */
 
 import Component from '@glimmer/component';
-import { run } from '@ember/runloop';
+import { next } from '@ember/runloop';
 import { isNone } from '@ember/utils';
 import { inject as service } from '@ember/service';
 import { restartableTask } from 'ember-concurrency';
@@ -197,7 +197,7 @@ export default class SequentialRender extends Component {
   }
 
   updateRenderStates({ report = true }) {
-    let runNext = run.next(() => {
+    let runNext = next(() => {
       this.reportRenderState({ report });
     });
     this.renderStates.addScheduledCall(this.args.taskName, runNext);

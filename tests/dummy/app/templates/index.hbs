@@ -4,11 +4,11 @@
 <DocsDemo @class="demo-wrapper" as |demo|>
   <h2 class="title">Example 1</h2>
   <demo.example @name="demolinks">
-    <LinkTo @route="docs.optimized" class="demo-link">
-      With Sequential Render
-    </LinkTo>
     <LinkTo @route="docs.unoptimized" class="demo-link">
       Without Sequential Render
+    </LinkTo>
+    <LinkTo @route="docs.optimized" class="demo-link">
+      With Sequential Render
     </LinkTo>
   </demo.example>
 </DocsDemo>
@@ -16,7 +16,7 @@
 
   <h2 class="title">Example 2</h2>
   <demo.example @name="priorityZero1.hbs">
-    <SequentialRender @renderPriority={{0}} @taskName="priorityZero1" @getData={{testTaskDelay}} as |renderHash|>
+    <SequentialRender @renderPriority={{0}} @taskName="priorityZero1" @getData={{this.testTaskDelay}} as |renderHash|>
       <renderHash.render-content>
         PO ELEMENT
       </renderHash.render-content>
@@ -26,7 +26,7 @@
     </SequentialRender>
   </demo.example>
   <demo.example @name="priorityOne1.hbs">
-    <SequentialRender @renderPriority={{1}} @taskName="priorityOne1" @getData={{testTaskDelay}} as |renderHash|>
+    <SequentialRender @renderPriority={{1}} @taskName="priorityOne1" @getData={{this.testTaskDelay}} as |renderHash|>
       <renderHash.render-content>
         P1 ELEMENT
       </renderHash.render-content>
