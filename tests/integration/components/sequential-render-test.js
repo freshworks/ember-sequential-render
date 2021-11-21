@@ -4,20 +4,32 @@ import { render, click } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 import { setupOnerror } from '@ember/test-helpers';
 
+const AFTER_RENDER = {
+  first: 'First Task',
+  second: 'Second Task',
+  third: 'Third Task',
+  fourth: 'Fourth Task',
+  fifth: 'Fifth Task',
+};
+
+const CONTENT = {
+  label: 'Test Content',
+};
+
 module(
   'Integration | Component | sequential-render | ComponentTest',
   function (hooks) {
     setupRenderingTest(hooks);
     hooks.beforeEach(async function (assert) {
       this.setProperties({
-        afterTask1: () => assert.step('first'),
-        afterTask2: () => assert.step('second'),
-        afterTask3: () => assert.step('third'),
-        afterTask4: () => assert.step('fourth'),
-        afterTask5: () => assert.step('fifth'),
+        afterTask1: () => assert.step(AFTER_RENDER.first),
+        afterTask2: () => assert.step(AFTER_RENDER.second),
+        afterTask3: () => assert.step(AFTER_RENDER.third),
+        afterTask4: () => assert.step(AFTER_RENDER.fourth),
+        afterTask5: () => assert.step(AFTER_RENDER.fifth),
         getData: () =>
           new Promise((resolve) => {
-            setTimeout(resolve(), 2000);
+            setTimeout(resolve(CONTENT), 2000);
           }),
         getDataNoPromise: () => 'test',
         getDataNotFunction: 'test',
@@ -30,6 +42,26 @@ module(
       setupOnerror();
     });
 
+    test('Test renderCallback is triggered and content is rendered', async function (assert) {
+      await render(hbs`
+      <SequentialRender
+        @taskName="task1"
+        @getData={{this.getData}}
+        @renderCallback={{this.afterTask1}}
+        as |seq1|
+      >
+        <seq1.render-content>
+          <h1>Render first: 
+            <span data-test-id="seq1-content">{{seq1.content.label}}</span>
+          </h1>
+        </seq1.render-content>
+      </SequentialRender>
+      `);
+
+      assert.verifySteps([AFTER_RENDER.first]);
+      assert.dom('[data-test-id="seq1-content"]').containsText(CONTENT.label);
+    });
+
     test('Check order of execution when no async task is present', async function (assert) {
       await render(hbs`
       <SequentialRender
@@ -39,7 +71,7 @@ module(
         as |firstComponent|
       >
         <firstComponent.render-content>
-          <h1>First</h1>
+          <h1>first</h1>
         </firstComponent.render-content>
         <firstComponent.loader-state>
           <h1>Loading...</h1>
@@ -59,46 +91,10 @@ module(
         </secondComponent.loader-state>
       </SequentialRender>
       `);
-      assert.verifySteps(['second', 'first']);
-    });
-    test('Check order of execution when an async task is present', async function (assert) {
-      await render(hbs`
-      <SequentialRender
-        @renderPriority={{0}}
-        @taskName="Task1"
-        @renderCallback={{this.afterTask1}}
-        as |seq|
-      >
-        <seq.render-content>
-          <h1>Render Second</h1>
-        </seq.render-content>
-      </SequentialRender>
-      <SequentialRender
-        @renderPriority={{1}}
-        @taskName="task2"
-        @getData={{this.getData}}
-        @renderCallback={{this.afterTask2}}
-        as |seq1|
-      >
-      <seq1.render-content>
-        <h1>Render Second</h1>
-      </seq1.render-content>
-      </SequentialRender>
-      <SequentialRender
-        @renderPriority={{1}}
-        @taskName="task3"
-        @renderCallback={{this.afterTask3}}
-        as |seq1|
-      >
-      <seq1.render-content>
-        <h1>Render Second</h1>
-      </seq1.render-content>
-      </SequentialRender>
-      `);
-      assert.verifySteps(['first', 'third', 'second']);
+      assert.verifySteps([AFTER_RENDER.second, AFTER_RENDER.first]);
     });
 
-    test('Check order of execution when an getData parameter which is a promise is present', async function (assert) {
+    test('Check order of execution and content when an async task is present', async function (assert) {
       await render(hbs`
       <SequentialRender
         @renderPriority={{0}}
@@ -117,12 +113,56 @@ module(
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >
-      <seq1.render-content>
-        <h1>Render Second</h1>
-      </seq1.render-content>
+        <seq1.render-content>
+          <h1>Render Second: 
+            <span data-test-id="seq1-content">{{seq1.content.label}}</span>
+          </h1>
+        </seq1.render-content>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
+        @taskName="task3"
+        @renderCallback={{this.afterTask3}}
+        as |seq1|
+      >
+        <seq1.render-content>
+          <h1>Render Second</h1>
+        </seq1.render-content>
+      </SequentialRender>
+      `);
+      assert.verifySteps([
+        AFTER_RENDER.first,
+        AFTER_RENDER.third,
+        AFTER_RENDER.second,
+      ]);
+      assert.dom('[data-test-id="seq1-content"]').containsText(CONTENT.label);
+    });
+
+    test('Check order of execution when priorities are skipped', async function (assert) {
+      await render(hbs`
+      <SequentialRender
+        @renderPriority={{0}}
+        @taskName="Task1"
+        @renderCallback={{this.afterTask1}}
+        as |seq|
+      >
+        <seq.render-content>
+          <h1>Render Second</h1>
+        </seq.render-content>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{2}}
+        @taskName="task2"
+        @getData={{this.getData}}
+        @renderCallback={{this.afterTask2}}
+        as |seq1|
+      >
+        <seq1.render-content>
+          <h1>Render Second</h1>
+        </seq1.render-content>
+      </SequentialRender>
+      <SequentialRender
+        @renderPriority={{4}}
         @taskName="task3"
         @renderCallback={{this.afterTask3}}
         as |seq1|
@@ -132,7 +172,11 @@ module(
       </seq1.render-content>
       </SequentialRender>
       `);
-      assert.verifySteps(['first', 'third', 'second']);
+      assert.verifySteps([
+        AFTER_RENDER.first,
+        AFTER_RENDER.second,
+        AFTER_RENDER.third,
+      ]);
     });
 
     test('Check order of execution when an getData returns non-promise', async function (assert) {
@@ -169,7 +213,11 @@ module(
       </seq1.render-content>
       </SequentialRender>
       `);
-      assert.verifySteps(['first', 'second', 'third']);
+      assert.verifySteps([
+        AFTER_RENDER.first,
+        AFTER_RENDER.second,
+        AFTER_RENDER.third,
+      ]);
     });
 
     test('Check error caught when getData throws some error', async function (assert) {
@@ -237,7 +285,12 @@ module(
       </SequentialRender>
       `);
       await click('[data-test-id="retry-button"]');
-      assert.verifySteps(['first', 'third', 'second', 'third']);
+      assert.verifySteps([
+        AFTER_RENDER.first,
+        AFTER_RENDER.third,
+        AFTER_RENDER.second,
+        AFTER_RENDER.third,
+      ]);
     });
 
     test('Test dynamically introduced higher priority elements', async function (assert) {
@@ -306,7 +359,13 @@ module(
         </SequentialRenderItem.loader-state>
       </SequentialRender>
       `);
-      assert.verifySteps(['first', 'third', 'second', 'fifth', 'fourth']);
+      assert.verifySteps([
+        AFTER_RENDER.first,
+        AFTER_RENDER.third,
+        AFTER_RENDER.second,
+        AFTER_RENDER.fifth,
+        AFTER_RENDER.fourth,
+      ]);
     });
   }
 );

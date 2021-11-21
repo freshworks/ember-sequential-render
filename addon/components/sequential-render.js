@@ -22,20 +22,21 @@
         // Handle loading state if required
       </renderHash.loader-state>
       <renderHash.render-content @loaderClass="loader-fade">
-        // Use renderHash.content to render the content
-        // Use renderHash.isContentLoading to act based on the data loading state
+        // Use renderHash.content to render the content.
+        // Use renderHash.isContentLoading to act based on the data loading state.
+        // Use renderHash.retry action to retrigger data fetch and rendering as applicable.
       {{/renderHash.render-content}}
     </SequentialRender>
   ```
   @class sequential-render
   @public
-  @yield {Hash} hash
-  @yield {Any} hash.content The response from performing getData.
-  @yield {boolean} hash.isContentLoading Flag to check the loading state of the data fetch.
-  @yield {component} hash.render-content Block component used to render the content of the item.
-        Accepts loaderClass as an argument. This class can be used to style the subsequent loading states for the item.  
-  @yield {component} hash.loader-state Block component used to render the loading state of the item.
-  @yield {action} hash.retry Exposes an action which can be used to retry the data fetch + render process without affecting the queue / app render states..
+  @yield {Hash} renderHash
+  @yield {Any} renderHash.content The response from performing getData.
+  @yield {boolean} renderHash.isContentLoading Flag to check the loading state of the data fetch.
+  @yield {component} renderHash.render-content Block component used to render the content of the item.
+        Accepts loaderClass as an argument. This class can be used to style the subsequent loading states for the item during rerender.  
+  @yield {component} renderHash.loader-state Block component used to render the loading state of the item.
+  @yield {action} renderHash.retry Exposes an action which can be used to retry the data fetch + render process without affecting the queue / app render states..
 */
 
 import Component from '@glimmer/component';
