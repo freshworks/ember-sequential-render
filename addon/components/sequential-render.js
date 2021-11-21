@@ -130,12 +130,6 @@ export default class SequentialRender extends Component {
     this._checkExecutionStatus();
   }
 
-  willDestroy() {
-    super.willDestroy(...arguments);
-
-    this.renderStates.removeFromQueue(this.renderPriority, this.args.taskName);
-  }
-
   _executeConditionalRender(isMatched) {
     let isPresentInQueue = this.renderStates.isPresentInQueue(
       this.renderPriority,
