@@ -62,7 +62,7 @@ module('Integration | Component | sequential-render/content', function (hooks) {
         .exists('Check yielded content');
     });
 
-    test('Check loaderClass behaviour whithout isFullFilled', async function (assert) {
+    test('Check loaderClass behaviour without isFullFilled', async function (assert) {
       await render(hbs`
         <SequentialRender::Content @loaderClass='loading-content'>
           <div data-test-id="yielded-content"> template block text </div>
