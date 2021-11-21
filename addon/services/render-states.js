@@ -89,7 +89,6 @@ export default class RenderStates extends Service {
   resetRenderState() {
     this._clearScheduledCalls();
     this._resetProperties();
-    this.triggerRenderStateChange(CRITICAL_RENDER_STATE);
   }
   modifyRenderState(state) {
     let isMaxPriority = state > this.maxRenderPriority;

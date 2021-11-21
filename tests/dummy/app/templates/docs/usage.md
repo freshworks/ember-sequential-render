@@ -41,10 +41,10 @@ In this example, the critical or hero element is the content inside the left pan
   <sequential-render
     renderPriority={{0}}
     taskName="getSpellWork"
-    getData={{getSpellWork}} as |spellHash|
+    getData={{this.getSpellWork}} as |spellHash|
   >
     <spellHash.render-content>
-      {{#each spellWork as |spell|}}
+      {{#each this.spellWork as |spell|}}
         <div class="card">
           <div class="title">
             {{spell.name}}

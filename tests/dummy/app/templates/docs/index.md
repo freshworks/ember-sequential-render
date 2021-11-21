@@ -8,6 +8,17 @@ ember-sequential-render helps in CRP optimization with the following features:
 
 A composable container component, **sequential-render**, which prioritizes and queues the data fetch and the rendering of its content with the necessary loading states.
 
+<DocsDemo @class="demo-wrapper" as |demo|>
+  <demo.example @name="demolinks">
+    <LinkTo @route="docs.unoptimized" class="demo-link">
+      Without Sequential Render
+    </LinkTo>
+    <LinkTo @route="docs.optimized" class="demo-link">
+      With Sequential Render
+    </LinkTo>
+  </demo.example>
+</DocsDemo>
 ### Postrender callback
 
 An elegant way to defer the load of thirdparty resources after the rendering of the highest priority item in your queue.
+
