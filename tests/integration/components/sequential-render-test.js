@@ -50,9 +50,11 @@ module(
         @renderCallback={{this.afterTask1}}
         as |seq1|
       >
-        <seq1.render-content>
+        <seq1.render-content @loaderClass="content--faded">
           <h1>Render first: 
-            <span data-test-id="seq1-content">{{seq1.content.label}}</span>
+            {{#unless seq1.isContentLoading}}
+              <span data-test-id="seq1-content">{{seq1.content.label}}</span>
+            {{/unless}}
           </h1>
         </seq1.render-content>
       </SequentialRender>

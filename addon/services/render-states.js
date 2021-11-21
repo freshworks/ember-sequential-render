@@ -24,7 +24,7 @@ const { critical: CRITICAL_RENDER_STATE, secondary: MAX_RENDER_PRIORITY } =
   RENDER_PRIORITY;
 
 export default class RenderStates extends Service {
-  @tracked renderState = CRITICAL_RENDER_STATE;
+  @tracked renderState;
 
   maxRenderPriority = MAX_RENDER_PRIORITY;
 
@@ -150,10 +150,9 @@ export default class RenderStates extends Service {
 
   removeFromQueue(priority, taskName) {
     let renderQueue = this.renderQueue;
-    let priorityQueue = renderQueue[priority] || A();
+    let priorityQueue = renderQueue[priority];
 
-    priorityQueue.removeObject(taskName);
-
+    priorityQueue?.removeObject(taskName);
     return isEmpty(priorityQueue);
   }
 
@@ -177,9 +176,9 @@ export default class RenderStates extends Service {
 
   isPresentInQueue(priority, taskName) {
     let renderQueue = this.renderQueue;
-    let priorityQueue = renderQueue[priority] || A();
+    let priorityQueue = renderQueue[priority];
 
-    return isPresent(taskName) && priorityQueue.includes(taskName);
+    return isPresent(taskName) && priorityQueue?.includes(taskName);
   }
 
   /**
