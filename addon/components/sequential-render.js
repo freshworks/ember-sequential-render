@@ -132,13 +132,17 @@ export default class SequentialRender extends Component {
   }
 
   _executeConditionalRender(isMatched) {
-    let isPresentInQueue = this.renderStates.isPresentInQueue(
-      this.renderPriority,
-      this.args.taskName
-    );
-    let isTaskScheduled = this.renderStates.isCallScheduled(this.args.taskName);
-    if (isMatched && isPresentInQueue && !isTaskScheduled) {
-      return this.fetchData.perform();
+    if (isMatched) {
+      let isPresentInQueue = this.renderStates.isPresentInQueue(
+        this.renderPriority,
+        this.args.taskName
+      );
+      let isTaskScheduled = this.renderStates.isCallScheduled(
+        this.args.taskName
+      );
+      if (isPresentInQueue && !isTaskScheduled) {
+        return this.fetchData.perform();
+      }
     }
   }
 
