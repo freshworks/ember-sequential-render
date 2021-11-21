@@ -1,5 +1,5 @@
-import Controller from '@ember/controller';
 import { timeout } from 'ember-concurrency';
+import Controller from './docs/unoptimized';
 
 export default class ApplicationController extends Controller {
   async testTaskDelay() {

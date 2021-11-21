@@ -9,8 +9,8 @@ const Router = AddonDocsRouter.extend({
 Router.map(function () {
   docsRoute(this, function () {
     this.route('usage');
-    this.route('optimized');
     this.route('unoptimized');
+    this.route('optimized');
   });
 });
 

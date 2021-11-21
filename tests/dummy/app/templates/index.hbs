@@ -1,58 +1,17 @@
 {{!-- template-lint-disable no-bare-strings  --}}
 
 <DocsHero @prefix="ember-sequential-render" @heading="" @byline="An elegant way to optimize your render performance" />
-<DocsDemo @class="demo-wrapper" as |demo|>
-  <h2 class="title">Example 1</h2>
-  <demo.example @name="demolinks">
-    <LinkTo @route="docs.unoptimized" class="demo-link">
-      Without Sequential Render
-    </LinkTo>
-    <LinkTo @route="docs.optimized" class="demo-link">
-      With Sequential Render
-    </LinkTo>
-  </demo.example>
-</DocsDemo>
-<DocsDemo @class="demo-wrapper" as |demo|>
 
-  <h2 class="title">Example 2</h2>
-  <demo.example @name="priorityZero1.hbs">
-    <SequentialRender @renderPriority={{0}} @taskName="priorityZero1" @getData={{testTaskDelay}} as |renderHash|>
-      <renderHash.render-content>
-        PO ELEMENT
-      </renderHash.render-content>
-      <renderHash.loader-state>
-        <div class="loader"></div>
-      </renderHash.loader-state>
-    </SequentialRender>
-  </demo.example>
-  <demo.example @name="priorityOne1.hbs">
-    <SequentialRender @renderPriority={{1}} @taskName="priorityOne1" @getData={{testTaskDelay}} as |renderHash|>
-      <renderHash.render-content>
-        P1 ELEMENT
-      </renderHash.render-content>
-      <renderHash.loader-state>
-        <div class="loader"></div>
-      </renderHash.loader-state>
-    </SequentialRender>
-  </demo.example>
-  <demo.example @name="priorityOne2.hbs">
-    <SequentialRender @renderPriority={{1}} @taskName="priorityOne2" as |renderHash|>
-      <renderHash.render-content>
-        P1 ELEMENT [No data fetch]
-      </renderHash.render-content>
-      <renderHash.loader-state>
-        <div class="loader"></div>
-      </renderHash.loader-state>
-    </SequentialRender>
-  </demo.example>
-  <demo.example @name="priorityTwo1.hbs">
-    <SequentialRender @renderPriority={{4}} @taskName="priorityTwo1" as |renderHash|>
-      <renderHash.render-content>
-        P4 ELEMENT [No data fetch]
-      </renderHash.render-content>
-      <renderHash.loader-state>
-        <div class="loader"></div>
-      </renderHash.loader-state>
-    </SequentialRender>
+<DocsDemo @class="demo-wrapper" as |demo|>
+  <h2 class="maintitle" >Example Layout</h2>
+  <demo.example @name="prioritized.hbs">
+    <ExampleOptimized
+      @getSpellWork={{this.getSpellWork}}
+      @spellWork={{this.spellWork}}
+      @getNotes={{this.getNotes}}
+      @notes={{this.notes}}
+      @getParticipants={{this.getParticipants}}
+      @participantsList={{this.participantsList}}
+    />
   </demo.example>
 </DocsDemo>

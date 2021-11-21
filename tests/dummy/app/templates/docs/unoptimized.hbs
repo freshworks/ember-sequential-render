@@ -3,7 +3,7 @@
 <div class="element-flex schoolroom">
   <div class="flex1 schoolroom__mainpanel">
     <h2 class="maintitle">Dumbledore's Army</h2>
-    {{#each spellWork as |spell|}}
+    {{#each this.spellWork as |spell|}}
       <div class="card">
         <div class="title">
           {{spell.name}}
@@ -20,7 +20,7 @@
         Participants
       </h4>
       <div class="element-flex avatarpane">
-        {{#each participantsList as |person|}}
+        {{#each this.participantsList as |person|}}
           <div class="avatar-item" aria-label={{person.name}}>
             <img class="element-flex avatar-image-wrapper" src={{person.avatar}} alt={{person.name}}>
           </div>
@@ -32,7 +32,7 @@
         Quick Notes
       </h4>
       <div class="editor" contenteditable="true">
-        {{notes}}
+        {{this.notes}}
       </div>
     </div>
   </div>

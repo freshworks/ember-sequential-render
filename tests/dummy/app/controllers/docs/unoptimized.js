@@ -15,7 +15,7 @@ export default class UnoptimizedController extends Controller {
     this.getParticipants = this.fetchParticipants.bind(this);
   }
   async fetchParticipants() {
-    let participants = await fetch(StaticUrl.mockURL500)
+    let participants = await fetch(StaticUrl.mockURL600)
       .then((response) => {
         return JSON.parse(response).participants;
       })
@@ -33,7 +33,7 @@ export default class UnoptimizedController extends Controller {
     return notes;
   }
   async fetchSpellWork() {
-    let spellWork = await fetch(StaticUrl.mockURL500)
+    let spellWork = await fetch(StaticUrl.mockURL600)
       .then((response) => {
         return JSON.parse(response).spellWork;
       })
