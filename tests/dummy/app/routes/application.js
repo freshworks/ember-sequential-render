@@ -1,12 +1,11 @@
 import Route from '@ember/routing/route';
 import { inject as service } from '@ember/service';
-import { get } from '@ember/object';
+import { action } from '@ember/object';
 
-export default Route.extend({
-  renderStates: service(),
-  actions: {
-    didTransition() {
-      get(this, 'renderStates').resetRenderState();
-    }
+export default class ApplicationRoute extends Route {
+  @service renderStates;
+  @action
+  didTransition() {
+    this.renderStates.resetRenderState();
   }
-})
+}

@@ -6,9 +6,7 @@ module.exports = {
 
   rules: {
     'no-bare-strings': true,
-    'quotes': 'double'
+    quotes: 'double',
   },
-  ignore: [
-    '**/tests/dummy/**'
-  ]
+  ignore: ['**/tests/dummy/**'],
 };

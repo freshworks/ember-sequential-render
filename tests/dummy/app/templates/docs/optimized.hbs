@@ -1,73 +1,8 @@
-{{!-- template-lint-disable no-bare-strings  --}}
-
-<div class="element-flex schoolroom">
-  <div class="flex1 schoolroom__mainpanel">
-    <h2 class="maintitle">Dumbledore's Army</h2>
-    {{#sequential-render
-      renderPriority=0
-      taskName="getSpellWork"
-      getData=getSpellWork as |spellHash|
-    }}
-      {{#spellHash.render-content}}
-        {{#each spellWork as |spell|}}
-          <div class="card">
-            <div class="title">
-              {{spell.name}}
-            </div>
-            <div class="subtext">
-              {{spell.description}}
-            </div>
-          </div>
-        {{/each}}
-      {{/spellHash.render-content}}
-      {{#spellHash.loader-state}}
-        <div class="loader"></div>
-      {{/spellHash.loader-state}}
-    {{/sequential-render}}
-  </div>
-  <div class="schoolroom__sidepane">
-    <div class="section">
-      <h4 class="title">
-        Participants
-      </h4>
-      {{#sequential-render
-        renderPriority=1
-        taskName="getParticipants"
-        getData=getParticipants as |participantsHash|
-      }}
-        {{#participantsHash.render-content}}
-          <div class="element-flex avatarpane">
-            {{#each participantsList as |person|}}
-              <div class="avatar-item" aria-label={{person.name}}>
-                <img class="element-flex avatar-image-wrapper" src={{person.avatar}} alt={{person.name}}>
-              </div>
-            {{/each}}
-          </div>
-        {{/participantsHash.render-content}}
-        {{#participantsHash.loader-state}}
-          <div class="loader"></div>
-        {{/participantsHash.loader-state}}
-      {{/sequential-render}}
-    </div>
-
-    <div class="section">
-      <h4 class="title">
-        Quick Notes
-      </h4>
-      {{#sequential-render
-        renderPriority=1
-        taskName="getNotes"
-        getData=getNotes as |notesHash|
-      }}
-        {{#notesHash.render-content}}
-          <div class="editor" contenteditable="true">
-            {{notes}}
-          </div>
-        {{/notesHash.render-content}}
-        {{#notesHash.loader-state}}
-          <div class="loader"></div>
-        {{/notesHash.loader-state}}
-      {{/sequential-render}}
-    </div>
-  </div>
-</div>
+<ExampleOptimized
+  @getSpellWork={{this.getSpellWork}}
+  @spellWork={{this.spellWork}}
+  @getNotes={{this.getNotes}}
+  @notes={{this.notes}}
+  @getParticipants={{this.getParticipants}}
+  @participantsList={{this.participantsList}}
+/>

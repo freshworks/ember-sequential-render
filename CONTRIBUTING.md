@@ -4,13 +4,12 @@
 
 * `git clone <repository-url>`
 * `cd ember-sequential-render`
-* `npm install`
+* `yarn install`
 
 ## Linting
 
-* `npm run lint:hbs`
-* `npm run lint:js`
-* `npm run lint:js -- --fix`
+* `yarn lint`
+* `yarn lint:fix`
 
 ## Running tests
 
