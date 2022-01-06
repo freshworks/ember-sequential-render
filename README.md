@@ -25,6 +25,8 @@ Compatibility
 * Ember CLI v3.20 or above
 * Node.js v12 or above
 
+For lower Ember versions, please use [v1.3.1](https://freshworks.github.io/ember-sequential-render/versions/v1.3.1/).
+
 
 Installation
 ------------------------------------------------------------------------------
