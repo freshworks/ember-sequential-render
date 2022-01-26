@@ -1,7 +1,7 @@
 Ember Sequential Render
 ==============================================================================
 
-![Build](https://github.com/freshworks/ember-sequential-render/workflows/Build/badge.svg?branch=master)
+![Build](https://github.com/freshworks/ember-sequential-render/workflows/Build/badge.svg?branch=main)
 
 
 Modern SPA layouts have an overload of information in the user's viewport in any given route. What's preventing secondary information from blocking or taking up resources, which, if left alone, would drastically improve the rendering of the primary content? 
