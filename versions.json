@@ -34,5 +34,11 @@
     "name": "auto-upgrade-high-priority-tasks",
     "sha": "3801462b455222ad48b2b38a97394932152122e7",
     "tag": null
+  },
+  "main": {
+    "path": "versions/main",
+    "name": "main",
+    "sha": "01e5771df7249e7f98519a0fd8eb425607a1b001",
+    "tag": null
   }
 }
