@@ -29,12 +29,6 @@
     "sha": "d9802d853f82defa67df60c370a95bd03cf598fc",
     "tag": "v1.3.1"
   },
-  "auto-upgrade-high-priority-tasks": {
-    "path": "versions/auto-upgrade-high-priority-tasks",
-    "name": "auto-upgrade-high-priority-tasks",
-    "sha": "3801462b455222ad48b2b38a97394932152122e7",
-    "tag": null
-  },
   "main": {
     "path": "versions/main",
     "name": "main",
