@@ -4,7 +4,7 @@
   <div class="flex1 schoolroom__mainpanel">
     <h2 class="maintitle">Dumbledore's Army</h2>
     <SequentialRender @renderPriority={{0}} @taskName="getSpellWork" @getData={{@getSpellWork}} as |spellHash|>
-      <spellHash.render-content>
+      <spellHash.contentTemplate>
         {{#each @spellWork as |spell|}}
           <div class="card">
             <div class="title">
@@ -15,10 +15,10 @@
             </div>
           </div>
         {{/each}}
-      </spellHash.render-content>
-      <spellHash.loader-state>
+      </spellHash.contentTemplate>
+      <spellHash.loaderTemplate>
         <div class="loader"></div>
-      </spellHash.loader-state>
+      </spellHash.loaderTemplate>
     </SequentialRender>
   </div>
   <div class="schoolroom__sidepane">
@@ -27,7 +27,7 @@
         Participants
       </h4>
       <SequentialRender @renderPriority={{1}} @taskName="getParticipants" @getData={{@getParticipants}} as |participantsHash|>
-        <participantsHash.render-content>
+        <participantsHash.contentTemplate>
           <div class="element-flex avatarpane">
             {{#each @participantsList as |person|}}
               <div class="avatar-item" aria-label={{person.name}}>
@@ -35,10 +35,10 @@
               </div>
             {{/each}}
           </div>
-        </participantsHash.render-content>
-        <participantsHash.loader-state>
+        </participantsHash.contentTemplate>
+        <participantsHash.loaderTemplate>
           <div class="loader"></div>
-        </participantsHash.loader-state>
+        </participantsHash.loaderTemplate>
       </SequentialRender>
     </div>
 
@@ -47,14 +47,14 @@
         Quick Notes
       </h4>
       <SequentialRender @renderPriority={{1}} @taskName="getNotes" @getData={{@getNotes}} as |notesHash|>
-        <notesHash.render-content>
+        <notesHash.contentTemplate>
           <div class="editor" contenteditable="true">
             {{@notes}}
           </div>
-        </notesHash.render-content>
-        <notesHash.loader-state>
+        </notesHash.contentTemplate>
+        <notesHash.loaderTemplate>
           <div class="loader"></div>
-        </notesHash.loader-state>
+        </notesHash.loaderTemplate>
       </SequentialRender>
     </div>
   </div>

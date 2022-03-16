@@ -18,14 +18,14 @@
       @getData={{this.executePromise}}
       @renderCallback={{action 'contentRenderCallback'}} as |renderHash|
     >
-      <renderHash.loader-state>
+      <renderHash.loaderTemplate>
         // Handle loading state if required
-      </renderHash.loader-state>
-      <renderHash.render-content @loaderClass="loader-fade">
+      </renderHash.loaderTemplate>
+      <renderHash.contentTemplate @loaderClass="loader-fade">
         // Use renderHash.content to render the content.
         // Use renderHash.isContentLoading to act based on the data loading state.
         // Use renderHash.retry action to retrigger data fetch and rendering as applicable.
-      {{/renderHash.render-content}}
+      </renderHash.contentTemplate>
     </SequentialRender>
   ```
   @class sequential-render
@@ -33,9 +33,9 @@
   @yield {Hash} renderHash
   @yield {Any} renderHash.content The response from performing getData.
   @yield {boolean} renderHash.isContentLoading Flag to check the loading state of the data fetch.
-  @yield {component} renderHash.render-content Block component used to render the content of the item.
+  @yield {component} renderHash.contentTemplate Block component used to render the content of the item.
         Accepts loaderClass as an argument. This class can be used to style the subsequent loading states for the item during rerender.  
-  @yield {component} renderHash.loader-state Block component used to render the loading state of the item.
+  @yield {component} renderHash.loaderTemplate Block component used to render the loading state of the item.
   @yield {action} renderHash.retry Exposes an action which can be used to retry the data fetch + render process without affecting the queue / app render states..
 */
 

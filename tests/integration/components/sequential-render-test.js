@@ -50,13 +50,13 @@ module(
         @renderCallback={{this.afterTask1}}
         as |seq1|
       >
-        <seq1.render-content @loaderClass="content--faded">
+        <seq1.contentTemplate @loaderClass="content--faded">
           <h1>Render first: 
             {{#unless seq1.isContentLoading}}
               <span data-test-id="seq1-content">{{seq1.content.label}}</span>
             {{/unless}}
           </h1>
-        </seq1.render-content>
+        </seq1.contentTemplate>
       </SequentialRender>
       `);
 
@@ -72,12 +72,12 @@ module(
         @renderCallback={{this.afterTask1}}
         as |firstComponent|
       >
-        <firstComponent.render-content>
+        <firstComponent.contentTemplate>
           <h1>first</h1>
-        </firstComponent.render-content>
-        <firstComponent.loader-state>
+        </firstComponent.contentTemplate>
+        <firstComponent.loaderTemplate>
           <h1>Loading...</h1>
-        </firstComponent.loader-state>
+        </firstComponent.loaderTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{0}}
@@ -85,12 +85,12 @@ module(
         @renderCallback={{this.afterTask2}}
         as |secondComponent|
       >
-        <secondComponent.render-content>
+        <secondComponent.contentTemplate>
           <h1>Second</h1>
-        </secondComponent.render-content>
-        <secondComponent.loader-state>
+        </secondComponent.contentTemplate>
+        <secondComponent.loaderTemplate>
           <h1>Loading...</h1>
-        </secondComponent.loader-state>
+        </secondComponent.loaderTemplate>
       </SequentialRender>
       `);
       assert.verifySteps([AFTER_RENDER.second, AFTER_RENDER.first]);
@@ -104,9 +104,9 @@ module(
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
-        <seq.render-content>
+        <seq.contentTemplate>
           <h1>Render Second</h1>
-        </seq.render-content>
+        </seq.contentTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -115,11 +115,11 @@ module(
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >
-        <seq1.render-content>
+        <seq1.contentTemplate>
           <h1>Render Second: 
             <span data-test-id="seq1-content">{{seq1.content.label}}</span>
           </h1>
-        </seq1.render-content>
+        </seq1.contentTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -127,9 +127,9 @@ module(
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
-        <seq1.render-content>
+        <seq1.contentTemplate>
           <h1>Render Second</h1>
-        </seq1.render-content>
+        </seq1.contentTemplate>
       </SequentialRender>
       `);
       assert.verifySteps([
@@ -148,9 +148,9 @@ module(
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
-        <seq.render-content>
+        <seq.contentTemplate>
           <h1>Render Second</h1>
-        </seq.render-content>
+        </seq.contentTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{2}}
@@ -159,9 +159,9 @@ module(
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >
-        <seq1.render-content>
+        <seq1.contentTemplate>
           <h1>Render Second</h1>
-        </seq1.render-content>
+        </seq1.contentTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{4}}
@@ -169,9 +169,9 @@ module(
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
-      <seq1.render-content>
+      <seq1.contentTemplate>
         <h1>Render Second</h1>
-      </seq1.render-content>
+      </seq1.contentTemplate>
       </SequentialRender>
       `);
       assert.verifySteps([
@@ -189,9 +189,9 @@ module(
         @renderCallback={{this.afterTask1}}
         as |seq|
       >
-        <seq.render-content>
+        <seq.contentTemplate>
           <h1>Render Second</h1>
-        </seq.render-content>
+        </seq.contentTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -200,9 +200,9 @@ module(
         @renderCallback={{this.afterTask2}}
         as |seq1|
       >
-      <seq1.render-content>
+      <seq1.contentTemplate>
         <h1>Render Second</h1>
-      </seq1.render-content>
+      </seq1.contentTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -210,9 +210,9 @@ module(
         @renderCallback={{this.afterTask3}}
         as |seq1|
       >
-      <seq1.render-content>
+      <seq1.contentTemplate>
         <h1>Render Second</h1>
-      </seq1.render-content>
+      </seq1.contentTemplate>
       </SequentialRender>
       `);
       assert.verifySteps([
@@ -237,9 +237,9 @@ module(
         @getData={{this.getDataThrowsError}}
         as |seq1|
       >
-      <seq1.render-content>
+      <seq1.contentTemplate>
         <h1>Render Second</h1>
-      </seq1.render-content>
+      </seq1.contentTemplate>
       </SequentialRender>
       `);
     });
@@ -251,12 +251,12 @@ module(
         @taskName="Task1"
         @renderCallback={{this.afterTask1}} as |SequentialRenderItem|
       >
-        <SequentialRenderItem.render-content>
+        <SequentialRenderItem.contentTemplate>
           <h1>Render First</h1>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
+        </SequentialRenderItem.contentTemplate>
+        <SequentialRenderItem.loaderTemplate>
           Loading...
-        </SequentialRenderItem.loader-state>
+        </SequentialRenderItem.loaderTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{2}}
@@ -264,12 +264,12 @@ module(
         @getData={{this.getData}}
         @renderCallback={{this.afterTask2}} as |SequentialRenderItem|
       >
-        <SequentialRenderItem.render-content>
+        <SequentialRenderItem.contentTemplate>
           <h1>Render Third</h1>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
+        </SequentialRenderItem.contentTemplate>
+        <SequentialRenderItem.loaderTemplate>
           Loading...
-        </SequentialRenderItem.loader-state>
+        </SequentialRenderItem.loaderTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -277,13 +277,13 @@ module(
         @getData={{this.getData}}
         @renderCallback={{this.afterTask3}} as |SequentialRenderItem|
       >
-        <SequentialRenderItem.render-content>
+        <SequentialRenderItem.contentTemplate>
           <h1>Render First</h1>
           <button type='button' data-test-id='retry-button' {{on "click" (fn SequentialRenderItem.retry)}}>Retry</button>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
+        </SequentialRenderItem.contentTemplate>
+        <SequentialRenderItem.loaderTemplate>
           Loading...
-        </SequentialRenderItem.loader-state>
+        </SequentialRenderItem.loaderTemplate>
       </SequentialRender>
       `);
       await click('[data-test-id="retry-button"]');
@@ -302,12 +302,12 @@ module(
         @taskName="Task1"
         @renderCallback={{this.afterTask1}} as |SequentialRenderItem|
       >
-        <SequentialRenderItem.render-content>
+        <SequentialRenderItem.contentTemplate>
           <h1>Render First</h1>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
+        </SequentialRenderItem.contentTemplate>
+        <SequentialRenderItem.loaderTemplate>
           Loading...
-        </SequentialRenderItem.loader-state>
+        </SequentialRenderItem.loaderTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{2}}
@@ -315,36 +315,36 @@ module(
         @getData={{this.getData}}
         @renderCallback={{this.afterTask2}} as |SequentialRenderItem|
       >
-        <SequentialRenderItem.render-content>
+        <SequentialRenderItem.contentTemplate>
           <h1>Render Third</h1>
           <SequentialRender
             @renderPriority={{3}}
             @taskName="Task4"
             @renderCallback={{this.afterTask4}} as |SequentialRenderItem|
           >
-            <SequentialRenderItem.render-content>
+            <SequentialRenderItem.contentTemplate>
               <h1>Render fourth</h1>
-            </SequentialRenderItem.render-content>
-            <SequentialRenderItem.loader-state>
+            </SequentialRenderItem.contentTemplate>
+            <SequentialRenderItem.loaderTemplate>
               Loading...
-            </SequentialRenderItem.loader-state>
+            </SequentialRenderItem.loaderTemplate>
           </SequentialRender>
           <SequentialRender
             @renderPriority={{1}}
             @taskName="Task5"
             @renderCallback={{this.afterTask5}} as |SequentialRenderItem|
           >
-            <SequentialRenderItem.render-content>
+            <SequentialRenderItem.contentTemplate>
               <h1>Render fifth</h1>
-            </SequentialRenderItem.render-content>
-            <SequentialRenderItem.loader-state>
+            </SequentialRenderItem.contentTemplate>
+            <SequentialRenderItem.loaderTemplate>
               Loading...
-            </SequentialRenderItem.loader-state>
+            </SequentialRenderItem.loaderTemplate>
           </SequentialRender>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
+        </SequentialRenderItem.contentTemplate>
+        <SequentialRenderItem.loaderTemplate>
           Loading...
-        </SequentialRenderItem.loader-state>
+        </SequentialRenderItem.loaderTemplate>
       </SequentialRender>
       <SequentialRender
         @renderPriority={{1}}
@@ -352,13 +352,13 @@ module(
         @getData={{this.getData}}
         @renderCallback={{this.afterTask3}} as |SequentialRenderItem|
       >
-        <SequentialRenderItem.render-content>
+        <SequentialRenderItem.contentTemplate>
           <h1>Render First</h1>
           <button type='button' data-test-id='retry-button' {{on "click" (fn SequentialRenderItem.retry)}}>Retry</button>
-        </SequentialRenderItem.render-content>
-        <SequentialRenderItem.loader-state>
+        </SequentialRenderItem.contentTemplate>
+        <SequentialRenderItem.loaderTemplate>
           Loading...
-        </SequentialRenderItem.loader-state>
+        </SequentialRenderItem.loaderTemplate>
       </SequentialRender>
       `);
       assert.verifySteps([

@@ -38,12 +38,12 @@ In this example, the critical or hero element is the content inside the left pan
 ```
 <div class="flex1 schoolroom__mainpanel">
   <h2 class="maintitle">Dumbledore's Army</h2>
-  <sequential-render
+  <SequentialRender
     renderPriority={{0}}
     taskName="getSpellWork"
     getData={{this.getSpellWork}} as |spellHash|
   >
-    <spellHash.render-content>
+    <spellHash.contentTemplate>
       {{#each this.spellWork as |spell|}}
         <div class="card">
           <div class="title">
@@ -54,11 +54,11 @@ In this example, the critical or hero element is the content inside the left pan
           </div>
         </div>
       {{/each}}
-    </spellHash.render-content>
-    <spellHash.loader-state>
+    </spellHash.contentTemplate>
+    <spellHash.loaderTemplate>
      // ...Loader
-    </spellHash.loader-state>
-  </sequential-render>
+    </spellHash.loaderTemplate>
+  </SequentialRender>
 </div>
 ```
 
