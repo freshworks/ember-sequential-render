@@ -43,7 +43,7 @@ Usage
 Contributing
 ------------------------------------------------------------------------------
 
-See the [Contributing](CONTRIBUTING.md) guide for details.
+See the [Contributing](CONTRIBUTING.md) guide for details. Feedback and suggestions are welcome!
 
 
 License
