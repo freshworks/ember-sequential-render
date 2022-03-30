@@ -29,12 +29,6 @@
     "sha": "d9802d853f82defa67df60c370a95bd03cf598fc",
     "tag": "v1.3.1"
   },
-  "main": {
-    "path": "versions/main",
-    "name": "main",
-    "sha": "01e5771df7249e7f98519a0fd8eb425607a1b001",
-    "tag": null
-  },
   "v2.0.0": {
     "path": "versions/v2.0.0",
     "name": "v2.0.0",
